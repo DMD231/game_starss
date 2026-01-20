@@ -3,313 +3,507 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎰 Lucky Stars Casino</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>🎰 Мини-Казино</title>
     <style>
-        /* (Стили те же самые, добавлен только стиль для кнопки пополнения) */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); color: white; min-height: 100vh; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; padding-bottom: 80px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        .header { text-align: center; padding: 25px; background: rgba(255, 255, 255, 0.08); border-radius: 20px; margin-bottom: 25px; }
-        .logo { font-size: 48px; margin-bottom: 10px; text-shadow: 0 0 20px #ffd700; }
-        .title { font-size: 28px; font-weight: 700; margin-bottom: 10px; background: linear-gradient(45deg, #ffd700, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .balance-card { position: relative; background: linear-gradient(45deg, #ff6b6b, #ffa726, #ffd700); border-radius: 18px; padding: 25px; margin-bottom: 25px; }
-        .balance-amount { font-size: 42px; font-weight: 800; display: flex; align-items: center; gap: 12px; }
-        
-        /* Кнопка пополнения внутри карточки баланса */
-        .btn-deposit {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            background: rgba(255,255,255,0.25);
-            border: 2px solid white;
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
             color: white;
-            padding: 8px 15px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .balance-card {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .balance-amount {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .game-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .game-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .bet-selector {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .bet-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .bet-btn {
+            padding: 12px 24px;
+            background: rgba(255, 215, 0, 0.8);
+            border: none;
+            border-radius: 10px;
+            color: #333;
             font-weight: bold;
             cursor: pointer;
-            text-decoration: none;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: 0.2s;
+            transition: background 0.3s;
         }
-        .btn-deposit:active { transform: scale(0.95); background: rgba(255,255,255,0.4); }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-bottom: 30px; }
-        .stat-card { background: rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 22px; text-align: center; }
-        .stat-value { font-size: 34px; font-weight: 800; margin: 10px 0; color: #4fc3f7; }
         
-        .action-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-bottom: 30px; }
-        .btn { padding: 22px 20px; border: none; border-radius: 15px; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; }
-        .btn-primary { background: linear-gradient(45deg, #2196f3, #21cbf3); color: white; }
-        .btn-success { background: linear-gradient(45deg, #4caf50, #8bc34a); color: white; }
-        .btn-warning { background: linear-gradient(45deg, #ff9800, #ffc107); color: white; }
+        .bet-btn:hover {
+            background: rgba(255, 215, 0, 1);
+        }
         
-        .history-section { background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 25px; margin-top: 30px; }
-        .card { background: rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 30px; margin-bottom: 25px; text-align: center; }
-        .input-group { margin-bottom: 20px; text-align: left; }
-        .input-group input { width: 100%; padding: 15px; border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 16px; }
-
-        .save-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; z-index: 100; }
-        .btn-save { background: linear-gradient(45deg, #6200ea, #b388ff); color: white; width: 100%; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        .play-btn {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(45deg, #FF416C, #FF4B2B);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .play-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .result-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            min-height: 100px;
+            display: none;
+        }
+        
+        .win {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .lose {
+            color: #FF5252;
+        }
+        
+        .slot-machine {
+            font-size: 48px;
+            letter-spacing: 20px;
+            margin: 20px 0;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .history-table th, .history-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .win-row {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        .lose-row {
+            background: rgba(255, 82, 82, 0.2);
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🎰</div>
-            <h1 class="title">Lucky Stars Casino</h1>
-            <p id="statusText">Загрузка...</p>
+            <h1>🎰 Мини-Казино</h1>
+            <p>Испытай удачу и выиграй монеты!</p>
         </div>
-
-        <div id="registrationForm" class="card" style="display: none;">
-            <h2><i class="fas fa-user-plus"></i> Регистрация</h2>
-            <div class="input-group">
-                <label for="username"><i class="fas fa-user"></i> Имя пользователя</label>
-                <input type="text" id="username" placeholder="Введите ваше имя" maxlength="20">
-            </div>
-            <button class="btn btn-primary" onclick="registerUser()" style="width: 100%; margin-top: 20px;">
-                <i class="fas fa-user-check"></i> Играть локально
-            </button>
+        
+        <div class="balance-card">
+            <h2>Ваш баланс</h2>
+            <div class="balance-amount" id="balance">0</div>
+            <p>монет</p>
         </div>
-
-        <div id="mainContent" style="display: none;">
-            <div class="balance-card">
-                <button class="btn-deposit" onclick="requestDeposit()">
-                    <i class="fas fa-plus-circle"></i> ПОПОЛНИТЬ
-                </button>
-                
-                <div class="balance-info">
-                    <h3><i class="fas fa-coins"></i> Ваш баланс</h3>
-                    <div class="balance-amount">
-                        <span id="starsBalance">0</span>
-                        <i class="fas fa-star" style="color: #FFD700;"></i>
-                    </div>
-                    <p id="freeSpinsText">Бесплатных круток: 0</p>
-                    <p id="userId" style="font-size: 12px; opacity: 0.7; margin-top: 5px;"></p>
-                </div>
+        
+        <div class="games-grid">
+            <div class="game-card" onclick="selectGame('slot')" id="slot-card">
+                <h3>🎰 Слоты</h3>
+                <p>Шанс выигрыша x10</p>
             </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <i class="fas fa-trophy"></i>
-                    <div class="stat-value" id="totalWins">0</div>
-                    <div class="stat-label">Побед</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-dice"></i>
-                    <div class="stat-value" id="totalGames">0</div>
-                    <div class="stat-label">Всего игр</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-percentage"></i>
-                    <div class="stat-value">15%</div>
-                    <div class="stat-label">Шанс выигрыша</div>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-fire"></i>
-                    <div class="stat-value" id="winStreak">0</div>
-                    <div class="stat-label">Серия побед</div>
-                </div>
+            <div class="game-card" onclick="selectGame('dice')" id="dice-card">
+                <h3>🎲 Кости</h3>
+                <p>Противостояние с казино</p>
             </div>
-
-            <div class="games-section">
-                <h2 class="section-title"><i class="fas fa-gamepad"></i> Доступные игры</h2>
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="playFreeSpin()">
-                        <i class="fas fa-gift"></i> Бесплатная крутка
-                        <span id="freeSpinsCounter" style="background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 20px;">0</span>
-                    </button>
-                    <button class="btn btn-success" onclick="playForStars()">
-                        <i class="fas fa-star"></i> Играть за 1 ⭐
-                    </button>
-                    <button class="btn btn-warning" onclick="playDice()">
-                        <i class="fas fa-dice"></i> Кости (15% шанс)
-                    </button>
-                </div>
+        </div>
+        
+        <div class="bet-selector">
+            <h3>Выберите ставку</h3>
+            <div class="bet-buttons">
+                <button class="bet-btn" onclick="selectBet(10)">10</button>
+                <button class="bet-btn" onclick="selectBet(50)">50</button>
+                <button class="bet-btn" onclick="selectBet(100)">100</button>
+                <button class="bet-btn" onclick="selectBet(500)">500</button>
+                <button class="bet-btn" onclick="selectBet(1000)">1000</button>
             </div>
-
-            <div class="history-section">
-                <h3><i class="fas fa-history"></i> История игр</h3>
-                <div class="history-list" id="gameHistory">
-                    <p style="text-align: center; opacity: 0.7; padding: 20px;">История игр пуста</p>
-                </div>
-            </div>
-            
-            <div style="height: 60px;"></div>
+        </div>
+        
+        <button class="play-btn" onclick="playGame()" id="play-btn">ИГРАТЬ</button>
+        
+        <div class="result-display" id="result-display">
+            <h3 id="result-title">Результат игры</h3>
+            <div id="result-content"></div>
+            <div id="result-details"></div>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <h3>История игр</h3>
+            <table class="history-table" id="history-table">
+                <thead>
+                    <tr>
+                        <th>Игра</th>
+                        <th>Ставка</th>
+                        <th>Результат</th>
+                        <th>Сумма</th>
+                        <th>Время</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                </tbody>
+            </table>
         </div>
     </div>
-
-    <div class="save-bar" id="saveBar" style="display: none;">
-        <button class="btn btn-save" onclick="saveToTelegram()">
-            <i class="fas fa-cloud-upload-alt"></i> СОХРАНИТЬ В TELEGRAM
-        </button>
+    
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
     </div>
-
+    
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        let userId = null;
-        let userData = null;
-        let sessionStats = { games: 0, wins: 0 };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const botUid = urlParams.get('uid');
-            const botStars = urlParams.get('stars');
-            const botSpins = urlParams.get('spins');
-
-            if (botUid) {
-                userId = botUid;
-                userData = {
-                    username: "Игрок",
-                    stars: parseInt(botStars) || 0,
-                    free_spins: parseInt(botSpins) || 0,
-                    total_wins: 0, 
-                    total_games: 0, 
-                    win_streak: 0,
-                    game_history: []
-                };
-                document.getElementById('statusText').innerText = "Синхронизировано";
-                document.getElementById('registrationForm').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                document.getElementById('saveBar').style.display = 'block';
-                updateUI();
-            } else {
-                document.getElementById('statusText').innerText = "Локальный режим";
-                if (loadLocalData()) {} else {
-                    document.getElementById('registrationForm').style.display = 'block';
-                }
-            }
-        });
-
-        // --- НОВАЯ ФУНКЦИЯ: ЗАПРОС НА ПОПОЛНЕНИЕ ---
-        function requestDeposit() {
-            if (!userId || userId.startsWith('local_')) {
-                alert("Пополнение доступно только при входе через Бота!");
+        // Получаем параметры из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const userId = urlParams.get('user_id');
+        
+        let selectedGame = 'slot';
+        let selectedBet = 10;
+        let balance = 0;
+        
+        // API URL - замените на ваш адрес сервера
+        const API_URL = 'http://localhost:5000/api';
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!token || !userId) {
+                alert('Неверная ссылка. Вернитесь в бота.');
                 return;
             }
-            // Отправляем боту спец. сигнал
-            tg.sendData(JSON.stringify({
-                action: 'open_shop_request',
-                stars: userData.stars // Сохраняем текущий прогресс на всякий случай
-            }));
-            // tg.close(); // Можно закрыть приложение, чтобы юзер увидел счет
+            
+            loadUserData();
+            loadGameHistory();
+            
+            // Выбираем первую игру по умолчанию
+            selectGame('slot');
+            selectBet(10);
+        });
+        
+        function selectGame(gameType) {
+            selectedGame = gameType;
+            
+            // Обновляем UI
+            document.getElementById('slot-card').style.background = 
+                gameType === 'slot' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.15)';
+            document.getElementById('dice-card').style.background = 
+                gameType === 'dice' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.15)';
         }
-
-        function saveToTelegram() {
-            if (!userId) return;
-            const dataToSend = {
-                action: 'save_progress',
-                stars: userData.stars,
-                free_spins: userData.free_spins,
-                session_games: sessionStats.games,
-                session_wins: sessionStats.wins
+        
+        function selectBet(amount) {
+            selectedBet = amount;
+            
+            // Обновляем UI кнопок
+            document.querySelectorAll('.bet-btn').forEach(btn => {
+                btn.style.background = 
+                    parseInt(btn.textContent) === amount ? 
+                    'rgba(255, 215, 0, 1)' : 'rgba(255, 215, 0, 0.8)';
+            });
+            
+            // Проверяем, хватает ли баланса
+            const playBtn = document.getElementById('play-btn');
+            if (amount > balance) {
+                playBtn.disabled = true;
+                playBtn.style.opacity = '0.5';
+                playBtn.textContent = 'НЕДОСТАТОЧНО СРЕДСТВ';
+            } else {
+                playBtn.disabled = false;
+                playBtn.style.opacity = '1';
+                playBtn.textContent = 'ИГРАТЬ';
+            }
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading').style.display = 
+                show ? 'flex' : 'none';
+        }
+        
+        async function loadUserData() {
+            try {
+                const response = await fetch(`${API_URL}/user`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token, user_id: userId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                balance = data.balance;
+                document.getElementById('balance').textContent = balance;
+                
+                // Обновляем состояние кнопки ставок
+                selectBet(selectedBet);
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+        
+        async function loadGameHistory() {
+            try {
+                const response = await fetch(`${API_URL}/games_history`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token, user_id: userId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.games) {
+                    const tbody = document.getElementById('history-body');
+                    tbody.innerHTML = '';
+                    
+                    data.games.forEach(game => {
+                        const row = document.createElement('tr');
+                        row.className = game.won ? 'win-row' : 'lose-row';
+                        
+                        row.innerHTML = `
+                            <td>${getGameName(game.game_type)}</td>
+                            <td>${game.bet}</td>
+                            <td>${game.result}</td>
+                            <td>${game.won ? '+' + (game.result - game.bet) : '-' + game.bet}</td>
+                            <td>${new Date(game.timestamp).toLocaleTimeString()}</td>
+                        `;
+                        
+                        tbody.appendChild(row);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+        
+        function getGameName(gameType) {
+            const games = {
+                'slot': '🎰 Слоты',
+                'dice': '🎲 Кости'
             };
-            tg.sendData(JSON.stringify(dataToSend));
+            return games[gameType] || gameType;
         }
-
-        function registerUser() {
-            const username = document.getElementById('username').value.trim();
-            if (!username) { alert("Введите имя!"); return; }
-            userId = 'local_' + Date.now();
-            userData = {
-                username: username, stars: 50, free_spins: 3,
-                total_wins: 0, total_games: 0, win_streak: 0, game_history: []
-            };
-            saveLocalData();
-            document.getElementById('registrationForm').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-            updateUI();
-        }
-
-        function loadLocalData() {
-            const savedData = localStorage.getItem('casino_user_data');
-            if (savedData) {
-                userData = JSON.parse(savedData);
-                userId = localStorage.getItem('casino_user_id');
-                document.getElementById('registrationForm').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                updateUI();
-                return true;
+        
+        async function playGame() {
+            if (selectedBet > balance) {
+                alert('Недостаточно средств!');
+                return;
             }
-            return false;
-        }
-
-        function saveLocalData() {
-            if (userId && userData) {
-                localStorage.setItem('casino_user_id', userId);
-                localStorage.setItem('casino_user_data', JSON.stringify(userData));
+            
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_URL}/play`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        token,
+                        user_id: userId,
+                        game_type: selectedGame,
+                        bet: selectedBet
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    showLoading(false);
+                    return;
+                }
+                
+                // Обновляем баланс
+                balance = data.new_balance;
+                document.getElementById('balance').textContent = balance;
+                
+                // Показываем результат
+                showResult(data);
+                
+                // Обновляем историю
+                loadGameHistory();
+                
+                // Обновляем состояние кнопки ставок
+                selectBet(selectedBet);
+                
+            } catch (error) {
+                console.error('Error playing game:', error);
+                alert('Ошибка соединения с сервером');
+            } finally {
+                showLoading(false);
             }
         }
-
-        function updateUI() {
-            if (!userData) return;
-            document.getElementById('starsBalance').textContent = userData.stars;
-            document.getElementById('freeSpinsText').textContent = `Бесплатных круток: ${userData.free_spins}`;
-            document.getElementById('freeSpinsCounter').textContent = userData.free_spins;
-            document.getElementById('totalWins').textContent = userData.total_wins; 
-            document.getElementById('totalGames').textContent = userData.total_games;
-            document.getElementById('winStreak').textContent = userData.win_streak;
-            document.getElementById('userId').textContent = `ID: ${userId}`;
-        }
-
-        function playFreeSpin() {
-            if (!userData || userData.free_spins <= 0) { tg.showAlert("Нет круток!"); return; }
-            userData.total_games++; sessionStats.games++; userData.free_spins--;
-            const isWin = Math.random() < 0.15;
-            if (isWin) {
-                const winAmount = Math.floor(Math.random() * 10) + 1;
-                userData.stars += winAmount; userData.total_wins++; sessionStats.wins++; userData.win_streak++;
-                tg.HapticFeedback.notificationOccurred('success');
-                alert(`🎉 Победа! +${winAmount} ⭐!`);
+        
+        function showResult(data) {
+            const display = document.getElementById('result-display');
+            const title = document.getElementById('result-title');
+            const content = document.getElementById('result-content');
+            const details = document.getElementById('result-details');
+            
+            display.style.display = 'block';
+            
+            if (data.won) {
+                title.textContent = '🎉 ПОБЕДА!';
+                title.className = 'win';
+                content.innerHTML = `
+                    <div style="font-size: 36px; margin: 20px 0;">
+                        🏆 +${data.win_amount - selectedBet} монет!
+                    </div>
+                `;
             } else {
-                userData.win_streak = 0;
-                tg.HapticFeedback.impactOccurred('light');
-                alert("❌ Проигрыш.");
+                title.textContent = '😞 ПРОИГРЫШ';
+                title.className = 'lose';
+                content.innerHTML = `
+                    <div style="font-size: 36px; margin: 20px 0;">
+                        💸 -${selectedBet} монет
+                    </div>
+                `;
             }
-            saveLocalData(); updateUI();
-        }
-
-        function playForStars() {
-            if (!userData || userData.stars < 1) { tg.showAlert("Мало звёзд!"); return; }
-            userData.total_games++; sessionStats.games++;
-            const isWin = Math.random() < 0.15;
-            if (isWin) {
-                const winAmount = Math.floor(Math.random() * 5) + 2;
-                userData.stars += winAmount - 1; userData.total_wins++; sessionStats.wins++; userData.win_streak++;
-                tg.HapticFeedback.notificationOccurred('success');
-                alert(`💰 Выигрыш! +${winAmount-1} ⭐`);
+            
+            if (selectedGame === 'slot') {
+                details.innerHTML = `
+                    <div class="slot-machine">${data.result.replace(/\|/g, ' ')}</div>
+                `;
             } else {
-                userData.stars--; userData.win_streak = 0;
-                tg.HapticFeedback.impactOccurred('heavy');
-                alert("❌ Проигрыш -1 ⭐");
+                details.innerHTML = `
+                    <div style="font-size: 24px; margin: 10px 0;">
+                        Ваш бросок: ${data.result.split(':')[0]} 
+                        vs ${data.result.split(':')[1]} : Казино
+                    </div>
+                `;
             }
-            saveLocalData(); updateUI();
-        }
-
-        function playDice() {
-            if (!userData || userData.stars < 1) { tg.showAlert("Мало звёзд!"); return; }
-            userData.total_games++; sessionStats.games++;
-            const diceValue = Math.floor(Math.random() * 6) + 1;
-            const isWin = diceValue >= 5;
-            if (isWin) {
-                const winAmount = 3;
-                userData.stars += winAmount - 1; userData.total_wins++; sessionStats.wins++; userData.win_streak++;
-                tg.HapticFeedback.notificationOccurred('success');
-                alert(`🎲 Выпало ${diceValue}. Выигрыш +2 ⭐`);
-            } else {
-                userData.stars--; userData.win_streak = 0;
-                tg.HapticFeedback.impactOccurred('heavy');
-                alert(`🎲 Выпало ${diceValue}. Проигрыш -1 ⭐`);
-            }
-            saveLocalData(); updateUI();
+            
+            details.innerHTML += `
+                <div style="margin-top: 20px;">
+                    Новый баланс: <strong>${data.new_balance}</strong> монет
+                </div>
+            `;
+            
+            // Прокручиваем к результату
+            display.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
