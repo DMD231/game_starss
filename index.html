@@ -6,421 +6,35 @@
     <title>🎰 Lucky Stars Casino</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Arial', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            animation: fadeIn 0.8s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .header {
-            text-align: center;
-            padding: 25px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-            z-index: -1;
-        }
-
-        .logo {
-            font-size: 48px;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700;
-            animation: glow 2s infinite alternate;
-        }
-
-        @keyframes glow {
-            from { text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700; }
-            to { text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700, 0 0 60px #ffd700; }
-        }
-
-        .title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #ffd700, #ff6b6b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .balance-card {
-            background: linear-gradient(45deg, #ff6b6b, #ffa726, #ffd700);
-            border-radius: 18px;
-            padding: 25px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 12px 25px rgba(255, 107, 107, 0.25);
-            animation: pulse 3s infinite;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .balance-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
-            z-index: -1;
-            animation: shine 3s infinite;
-        }
-
-        .balance-info h3 {
-            font-size: 18px;
-            opacity: 0.9;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .balance-amount {
-            font-size: 42px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .stars-icon {
-            color: #FFD700;
-            text-shadow: 0 0 10px #FFD700;
-        }
-
-        .refresh-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 18px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 22px;
-            text-align: center;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-8px);
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 215, 0, 0.3);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .stat-card i {
-            font-size: 32px;
-            margin-bottom: 15px;
-            color: #4fc3f7;
-        }
-
-        .stat-value {
-            font-size: 34px;
-            font-weight: 800;
-            margin: 10px 0;
-            color: #4fc3f7;
-            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
-        }
-
-        .games-section {
-            margin-bottom: 35px;
-        }
-
-        .section-title {
-            font-size: 22px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #ffd700;
-        }
-
-        .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 18px;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            padding: 22px 20px;
-            border: none;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #2196f3, #21cbf3);
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(45deg, #4caf50, #8bc34a);
-            color: white;
-        }
-
-        .btn-warning {
-            background: linear-gradient(45deg, #ff9800, #ffc107);
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(45deg, #f44336, #ff5252);
-            color: white;
-        }
-
-        .history-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 25px;
-            margin-top: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .history-title {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .history-list {
-            max-height: 200px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        .history-item {
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        .history-item.win {
-            border-left: 4px solid #4caf50;
-        }
-
-        .history-item.loss {
-            border-left: 4px solid #f44336;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 25px;
-            margin-top: 30px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            font-size: 14px;
-            opacity: 0.7;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 500px;
-            width: 90%;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            position: relative;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 28px;
-            cursor: pointer;
-            color: #ff6b6b;
-            transition: all 0.3s;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 30px;
-        }
-
-        .spinner {
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top: 5px solid #ffd700;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 25px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #ffd700;
-            font-weight: 600;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #ffd700;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-        }
-
-        @media (max-width: 768px) {
-            .action-buttons {
-                grid-template-columns: 1fr;
-            }
-            
-            .balance-amount {
-                font-size: 32px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header {
-                padding: 20px 15px;
-            }
-            
-            .title {
-                font-size: 22px;
-            }
-        }
+        /* Стили оставляем те же красивые */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); color: white; min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; animation: fadeIn 0.8s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .header { text-align: center; padding: 25px; background: rgba(255, 255, 255, 0.08); border-radius: 20px; margin-bottom: 25px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); }
+        .logo { font-size: 48px; margin-bottom: 10px; text-shadow: 0 0 20px #ffd700; animation: glow 2s infinite alternate; }
+        @keyframes glow { from { text-shadow: 0 0 10px #ffd700; } to { text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700; } }
+        .title { font-size: 28px; font-weight: 700; margin-bottom: 10px; background: linear-gradient(45deg, #ffd700, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .balance-card { background: linear-gradient(45deg, #ff6b6b, #ffa726, #ffd700); border-radius: 18px; padding: 25px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 12px 25px rgba(255, 107, 107, 0.25); animation: pulse 3s infinite; }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        .balance-amount { font-size: 42px; font-weight: 800; display: flex; align-items: center; gap: 12px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-bottom: 30px; }
+        .stat-card { background: rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 22px; text-align: center; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-8px); background: rgba(255, 255, 255, 0.12); }
+        .stat-value { font-size: 34px; font-weight: 800; margin: 10px 0; color: #4fc3f7; }
+        .action-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-bottom: 30px; }
+        .btn { padding: 22px 20px; border: none; border-radius: 15px; font-size: 18px; font-weight: 700; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); }
+        .btn-primary { background: linear-gradient(45deg, #2196f3, #21cbf3); color: white; }
+        .btn-success { background: linear-gradient(45deg, #4caf50, #8bc34a); color: white; }
+        .btn-warning { background: linear-gradient(45deg, #ff9800, #ffc107); color: white; }
+        .history-section { background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 25px; margin-top: 30px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .history-item { padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .history-item.win { border-left: 4px solid #4caf50; }
+        .history-item.loss { border-left: 4px solid #f44336; }
+        .card { background: rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 30px; margin-bottom: 25px; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group input { width: 100%; padding: 15px; border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 16px; }
+        @media (max-width: 768px) { .action-buttons { grid-template-columns: 1fr; } .balance-amount { font-size: 32px; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
@@ -428,7 +42,7 @@
         <div class="header">
             <div class="logo">🎰</div>
             <h1 class="title">Lucky Stars Casino</h1>
-            <p class="subtitle">Испытай удачу! Все данные синхронизируются с Telegram ботом.</p>
+            <p class="subtitle">Простая синхронизация через User ID. Играй и выигрывай звёзды!</p>
         </div>
 
         <div id="registrationForm" class="card">
@@ -440,7 +54,6 @@
             <button class="btn btn-primary" onclick="registerUser()" style="width: 100%; margin-top: 20px;">
                 <i class="fas fa-user-check"></i> Зарегистрироваться
             </button>
-            <p id="registrationStatus" style="margin-top: 15px; color: #4fc3f7;"></p>
         </div>
 
         <div id="mainContent" style="display: none;">
@@ -449,12 +62,12 @@
                     <h3><i class="fas fa-coins"></i> Ваш баланс</h3>
                     <div class="balance-amount">
                         <span id="starsBalance">0</span>
-                        <i class="fas fa-star stars-icon"></i>
+                        <i class="fas fa-star" style="color: #FFD700;"></i>
                     </div>
                     <p id="freeSpinsText">Бесплатных круток: 0</p>
                     <p id="userId" style="font-size: 12px; opacity: 0.7; margin-top: 5px;"></p>
                 </div>
-                <button class="refresh-btn" onclick="loadUserData()">
+                <button class="refresh-btn" onclick="loadUserData()" style="background: rgba(255,255,255,0.15); border: none; border-radius: 50%; width: 50px; height: 50px; color: white;">
                     <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
@@ -495,18 +108,12 @@
                     <button class="btn btn-warning" onclick="playDice()">
                         <i class="fas fa-dice"></i> Кости (15% шанс)
                     </button>
-                    <button class="btn btn-danger" onclick="buyStarsInBot()">
-                        <i class="fas fa-shopping-cart"></i> Купить звёзды
-                    </button>
                 </div>
             </div>
 
             <div class="history-section">
                 <div class="history-title">
                     <h3><i class="fas fa-history"></i> История игр</h3>
-                    <button class="refresh-btn" style="width: 40px; height: 40px;" onclick="loadGameHistory()">
-                        <i class="fas fa-redo"></i>
-                    </button>
                 </div>
                 <div class="history-list" id="gameHistory">
                 </div>
@@ -514,54 +121,25 @@
 
             <div class="card" style="margin-top: 20px;">
                 <h3><i class="fas fa-sync-alt"></i> Синхронизация с ботом</h3>
-                <p>Ваш уникальный код для синхронизации:</p>
+                <p>Ваш уникальный User ID для синхронизации:</p>
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <input type="text" id="syncCode" readonly 
-                           style="flex: 1; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid #4fc3f7; border-radius: 8px; color: white;">
-                    <button class="btn btn-primary" onclick="copySyncCode()" style="padding: 12px 20px;">
+                    <input type="text" id="userIdDisplay" readonly 
+                           style="flex: 1; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid #4fc3f7; border-radius: 8px; color: white; font-family: monospace;">
+                    <button class="btn btn-primary" onclick="copyUserId()" style="padding: 12px 20px;">
                         <i class="fas fa-copy"></i> Копировать
                     </button>
                 </div>
                 <p style="margin-top: 10px; font-size: 12px; opacity: 0.7;">
-                    Отправьте боту команду: <code>/sync ВАШ_КОД</code>
+                    Отправьте боту в Telegram:<br>
+                    <code>sync:ВАШ_USER_ID</code>
                 </p>
             </div>
         </div>
-
-        <div class="footer">
-            <p>© 2023 Lucky Stars Casino</p>
-            <p>Все покупки звёзд происходят через Telegram бота</p>
-        </div>
-    </div>
-
-    <div id="resultModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('resultModal')">&times;</span>
-            <h2 id="resultTitle" style="text-align: center; margin-bottom: 20px;"></h2>
-            <div id="resultIcon" style="text-align: center; font-size: 80px; margin: 20px 0;"></div>
-            <p id="resultMessage" style="text-align: center; font-size: 18px; margin-bottom: 30px;"></p>
-            <button class="btn btn-primary" style="width: 100%;" onclick="closeModal('resultModal')">Понятно</button>
-        </div>
-    </div>
-
-    <div id="loading" class="loading">
-        <div class="spinner"></div>
-        <p id="loadingText">Загрузка...</p>
     </div>
 
     <script>
         let userId = null;
         let userData = null;
-        let tg = null;
-
-        function initTelegramWebApp() {
-            if (window.Telegram && Telegram.WebApp) {
-                tg = Telegram.WebApp;
-                tg.expand();
-                return true;
-            }
-            return false;
-        }
 
         function generateUserId() {
             return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -571,11 +149,9 @@
             const username = document.getElementById('username').value.trim();
             
             if (!username) {
-                showResult("Ошибка", "❌", "Введите имя пользователя");
+                alert("Введите имя пользователя!");
                 return;
             }
-            
-            showLoading("Создание профиля...");
             
             userId = generateUserId();
             
@@ -587,8 +163,7 @@
                 total_games: 0,
                 win_streak: 0,
                 registration_date: new Date().toISOString(),
-                game_history: [],
-                transactions: []
+                game_history: []
             };
             
             saveUserData();
@@ -597,18 +172,18 @@
             document.getElementById('mainContent').style.display = 'block';
             
             updateUI();
-            hideLoading();
             
-            showResult("Добро пожаловать!", "🎉", `Привет, ${username}!`);
-            
-            if (tg) {
-                tg.sendData(JSON.stringify({
+            // Отправляем данные боту
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.sendData(JSON.stringify({
                     action: 'register',
                     user_id: userId,
                     username: username,
                     user_data: userData
                 }));
             }
+            
+            alert(`✅ Регистрация успешна!\n\nИмя: ${username}\nUser ID: ${userId}\n\nСкопируйте User ID для синхронизации!`);
         }
 
         function loadUserData() {
@@ -618,9 +193,6 @@
             if (savedUserId && savedData) {
                 userId = savedUserId;
                 userData = JSON.parse(savedData);
-                
-                userData.last_login = new Date().toISOString();
-                saveUserData();
                 
                 document.getElementById('registrationForm').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
@@ -635,14 +207,6 @@
             if (userId && userData) {
                 localStorage.setItem('casino_user_id', userId);
                 localStorage.setItem('casino_user_data', JSON.stringify(userData));
-                
-                if (tg) {
-                    tg.sendData(JSON.stringify({
-                        action: 'update_data',
-                        user_id: userId,
-                        user_data: userData
-                    }));
-                }
                 return true;
             }
             return false;
@@ -658,7 +222,7 @@
             document.getElementById('totalGames').textContent = userData.total_games;
             document.getElementById('winStreak').textContent = userData.win_streak;
             document.getElementById('userId').textContent = `ID: ${userId}`;
-            document.getElementById('syncCode').value = userId;
+            document.getElementById('userIdDisplay').value = userId;
             
             updateGameHistory();
         }
@@ -668,7 +232,7 @@
             historyContainer.innerHTML = '';
             
             if (userData.game_history && userData.game_history.length > 0) {
-                userData.game_history.slice(-10).reverse().forEach(game => {
+                userData.game_history.slice(-5).reverse().forEach(game => {
                     const historyItem = document.createElement('div');
                     historyItem.className = `history-item ${game.type}`;
                     
@@ -676,12 +240,12 @@
                     
                     if (game.type === 'win') {
                         historyItem.innerHTML = `
-                            <span><i class="fas fa-check-circle" style="color: #4caf50;"></i> +${game.amount} ⭐ (${game.game_type})</span>
+                            <span><i class="fas fa-check-circle" style="color: #4caf50;"></i> +${game.amount} ⭐</span>
                             <span style="font-size: 12px; opacity: 0.7;">${date}</span>
                         `;
                     } else {
                         historyItem.innerHTML = `
-                            <span><i class="fas fa-times-circle" style="color: #f44336;"></i> Проигрыш (${game.game_type})</span>
+                            <span><i class="fas fa-times-circle" style="color: #f44336;"></i> Проигрыш</span>
                             <span style="font-size: 12px; opacity: 0.7;">${date}</span>
                         `;
                     }
@@ -695,317 +259,148 @@
 
         function playFreeSpin() {
             if (!userData || userData.free_spins <= 0) {
-                showResult("Нет попыток", "⚠️", "У вас закончились бесплатные крутки");
+                alert("У вас закончились бесплатные крутки!");
                 return;
             }
             
-            showResult("Крутим!", "🎰", "Запускаем бесплатную крутку...");
+            userData.total_games++;
+            userData.free_spins--;
             
-            setTimeout(() => {
-                const isWin = Math.random() < 0.15;
+            const isWin = Math.random() < 0.15;
+            
+            if (isWin) {
+                const winAmount = Math.floor(Math.random() * 10) + 1;
+                userData.stars += winAmount;
+                userData.total_wins++;
+                userData.win_streak++;
                 
-                userData.total_games++;
-                userData.free_spins--;
+                userData.game_history.push({
+                    type: 'win',
+                    amount: winAmount,
+                    timestamp: new Date().toISOString()
+                });
                 
-                if (isWin) {
-                    const winAmount = Math.floor(Math.random() * 10) + 1;
-                    userData.stars += winAmount;
-                    userData.total_wins++;
-                    userData.win_streak++;
-                    
-                    userData.game_history.push({
-                        type: 'win',
-                        game_type: 'free_slots',
-                        amount: winAmount,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    userData.transactions.push({
-                        type: 'win',
-                        amount: winAmount,
-                        description: 'Выигрыш в бесплатных слотах',
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    showResult("Победа!", "🎉", `Вы выиграли ${winAmount} ⭐!`);
-                    
-                    if (tg) {
-                        tg.sendData(JSON.stringify({
-                            action: 'game_result',
-                            user_id: userId,
-                            result: 'win',
-                            amount: winAmount,
-                            game_type: 'free_slots'
-                        }));
-                    }
-                } else {
-                    userData.win_streak = 0;
-                    
-                    userData.game_history.push({
-                        type: 'loss',
-                        game_type: 'free_slots',
-                        amount: 0,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    showResult("Повезёт в следующий раз", "😔", "К сожалению, вы не выиграли");
-                }
+                alert(`🎉 Победа! Вы выиграли ${winAmount} ⭐!`);
+            } else {
+                userData.win_streak = 0;
                 
-                saveUserData();
-                updateUI();
+                userData.game_history.push({
+                    type: 'loss',
+                    amount: 0,
+                    timestamp: new Date().toISOString()
+                });
                 
-            }, 2000);
+                alert("❌ Проигрыш. Повезёт в следующий раз!");
+            }
+            
+            saveUserData();
+            updateUI();
         }
 
         function playForStars() {
             if (!userData || userData.stars < 1) {
-                showResult("Недостаточно звёзд", "⚠️", "Пополните баланс для игры");
+                alert("Недостаточно звёзд!");
                 return;
             }
             
-            showResult("Ставка принята!", "⭐", "Играем за 1 звезду...");
+            userData.total_games++;
             
-            setTimeout(() => {
-                const isWin = Math.random() < 0.15;
+            const isWin = Math.random() < 0.15;
+            
+            if (isWin) {
+                const winAmount = Math.floor(Math.random() * 5) + 2;
+                userData.stars += winAmount - 1;
+                userData.total_wins++;
+                userData.win_streak++;
                 
-                userData.total_games++;
+                userData.game_history.push({
+                    type: 'win',
+                    amount: winAmount,
+                    timestamp: new Date().toISOString()
+                });
                 
-                if (isWin) {
-                    const winAmount = Math.floor(Math.random() * 5) + 2;
-                    userData.stars += winAmount - 1;
-                    userData.total_wins++;
-                    userData.win_streak++;
-                    
-                    userData.game_history.push({
-                        type: 'win',
-                        game_type: 'paid_slots',
-                        amount: winAmount,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    userData.transactions.push({
-                        type: 'win',
-                        amount: winAmount,
-                        description: 'Выигрыш в платных слотах',
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    showResult("Выигрыш!", "💰", `Вы выиграли ${winAmount} ⭐ (чистая прибыль: ${winAmount-1} ⭐)`);
-                    
-                    if (tg) {
-                        tg.sendData(JSON.stringify({
-                            action: 'game_result',
-                            user_id: userId,
-                            result: 'win',
-                            amount: winAmount,
-                            game_type: 'paid_slots'
-                        }));
-                    }
-                } else {
-                    userData.stars--;
-                    userData.win_streak = 0;
-                    
-                    userData.game_history.push({
-                        type: 'loss',
-                        game_type: 'paid_slots',
-                        amount: 1,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    userData.transactions.push({
-                        type: 'loss',
-                        amount: 1,
-                        description: 'Проигрыш в платных слотах',
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    showResult("Проигрыш", "❌", "Вы проиграли 1 ⭐");
-                }
+                alert(`💰 Выигрыш! Вы выиграли ${winAmount} ⭐ (чистая прибыль: ${winAmount-1} ⭐)`);
+            } else {
+                userData.stars--;
+                userData.win_streak = 0;
                 
-                saveUserData();
-                updateUI();
+                userData.game_history.push({
+                    type: 'loss',
+                    amount: 1,
+                    timestamp: new Date().toISOString()
+                });
                 
-            }, 2000);
+                alert("❌ Проигрыш. Вы проиграли 1 ⭐");
+            }
+            
+            saveUserData();
+            updateUI();
         }
 
         function playDice() {
             if (!userData || userData.stars < 1) {
-                showResult("Недостаточно звёзд", "⚠️", "Пополните баланс для игры");
+                alert("Недостаточно звёзд!");
                 return;
             }
             
-            showResult("Бросаем кости!", "🎲", "Делаем ставку 1 ⭐...");
+            userData.total_games++;
             
-            setTimeout(() => {
-                const diceValue = Math.floor(Math.random() * 6) + 1;
-                const isWin = diceValue >= 5;
+            const diceValue = Math.floor(Math.random() * 6) + 1;
+            const isWin = diceValue >= 5;
+            
+            if (isWin) {
+                const winAmount = 3;
+                userData.stars += winAmount - 1;
+                userData.total_wins++;
+                userData.win_streak++;
                 
-                userData.total_games++;
+                userData.game_history.push({
+                    type: 'win',
+                    amount: winAmount,
+                    timestamp: new Date().toISOString()
+                });
                 
-                if (isWin) {
-                    const winAmount = 3;
-                    userData.stars += winAmount - 1;
-                    userData.total_wins++;
-                    userData.win_streak++;
-                    
-                    userData.game_history.push({
-                        type: 'win',
-                        game_type: 'dice',
-                        amount: winAmount,
-                        dice_value: diceValue,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    userData.transactions.push({
-                        type: 'win',
-                        amount: winAmount,
-                        description: `Выигрыш в костях (выпало ${diceValue})`,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    showResult(`Выпало ${diceValue}!`, "🎲", `Победа! Выигрыш: ${winAmount} ⭐`);
-                    
-                    if (tg) {
-                        tg.sendData(JSON.stringify({
-                            action: 'game_result',
-                            user_id: userId,
-                            result: 'win',
-                            amount: winAmount,
-                            game_type: 'dice'
-                        }));
-                    }
-                } else {
-                    userData.stars--;
-                    userData.win_streak = 0;
-                    
-                    userData.game_history.push({
-                        type: 'loss',
-                        game_type: 'dice',
-                        amount: 1,
-                        dice_value: diceValue,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    userData.transactions.push({
-                        type: 'loss',
-                        amount: 1,
-                        description: `Проигрыш в костях (выпало ${diceValue})`,
-                        timestamp: new Date().toISOString()
-                    });
-                    
-                    showResult(`Выпало ${diceValue}`, "🎲", "Вы проиграли 1 ⭐");
-                }
-                
-                saveUserData();
-                updateUI();
-                
-            }, 2000);
-        }
-
-        function buyStarsInBot() {
-            if (tg) {
-                tg.sendData(JSON.stringify({
-                    action: 'buy_stars',
-                    user_id: userId
-                }));
-                showResult("Покупка звёзд", "🛒", "Открываем меню покупки в боте...");
+                alert(`🎲 Победа! Выпало ${diceValue}. Выигрыш: ${winAmount} ⭐`);
             } else {
-                showResult("Ошибка", "❌", "Откройте приложение через Telegram бота");
+                userData.stars--;
+                userData.win_streak = 0;
+                
+                userData.game_history.push({
+                    type: 'loss',
+                    amount: 1,
+                    timestamp: new Date().toISOString()
+                });
+                
+                alert(`🎲 Проигрыш. Выпало ${diceValue}. Вы проиграли 1 ⭐`);
             }
+            
+            saveUserData();
+            updateUI();
         }
 
-        function copySyncCode() {
-            const syncCode = document.getElementById('syncCode');
-            syncCode.select();
-            syncCode.setSelectionRange(0, 99999);
+        function copyUserId() {
+            const userIdInput = document.getElementById('userIdDisplay');
+            userIdInput.select();
+            userIdInput.setSelectionRange(0, 99999);
             
-            navigator.clipboard.writeText(syncCode.value)
+            navigator.clipboard.writeText(userIdInput.value)
                 .then(() => {
-                    showNotification("Код скопирован в буфер обмена!");
+                    alert("User ID скопирован в буфер обмена!");
                 })
                 .catch(err => {
                     console.error('Ошибка копирования:', err);
                 });
         }
 
-        function loadGameHistory() {
-            updateGameHistory();
-            showNotification("История обновлена!");
-        }
-
-        function showLoading(text = "Загрузка...") {
-            document.getElementById('loadingText').textContent = text;
-            document.getElementById('loading').style.display = 'block';
-        }
-
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        function showResult(title, icon, message) {
-            document.getElementById('resultTitle').textContent = title;
-            document.getElementById('resultIcon').textContent = icon;
-            document.getElementById('resultMessage').textContent = message;
-            document.getElementById('resultModal').style.display = 'flex';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(45deg, #4caf50, #8bc34a);
-                color: white;
-                padding: 15px 25px;
-                border-radius: 10px;
-                z-index: 1000;
-                animation: slideIn 0.3s ease;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                max-width: 300px;
-            `;
-            notification.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 10px;"></i> ${message}`;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = "slideOut 0.3s ease";
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
-            initTelegramWebApp();
-            
             const hasData = loadUserData();
             
             if (!hasData) {
                 document.getElementById('registrationForm').style.display = 'block';
                 document.getElementById('mainContent').style.display = 'none';
             }
-            
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOut {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            setInterval(() => {
-                if (userData) {
-                    saveUserData();
-                }
-            }, 30000);
         });
     </script>
 </body>
 </html>
+
