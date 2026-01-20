@@ -1,204 +1,30 @@
 
-           <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Stars Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --neon-color: #00FFFF;
-            --bg-color: #0d001a;
-            --text-color: #ffffff;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Press Start 2P', cursive;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            touch-action: manipulation;
-        }
-
-        /* Звездный фон (декоративный) */
-        .background-stars {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-
-        .bg-star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: twinkle 3s infinite;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.8; }
-        }
-
-        /* Интерфейс */
-        #ui-layer {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            transition: opacity 0.5s ease;
-        }
-
-        h1 {
-            font-size: 24px;
-            text-shadow: 0 0 10px var(--neon-color), 0 0 20px var(--neon-color);
-            margin-bottom: 30px;
-        }
-
-        .score-board {
-            position: fixed;
-            top: 20px;
-            font-size: 14px;
-            color: var(--neon-color);
-            display: none; /* Скрыт до начала игры */
-        }
-
-        .neon-button {
-            background: transparent;
-            border: 2px solid var(--neon-color);
-            color: var(--neon-color);
-            padding: 15px 25px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 12px;
-            cursor: pointer;
-            box-shadow: 0 0 15px var(--neon-color);
-            border-radius: 5px;
-        }
-
-        /* Игровые звезды (на которые надо нажимать) */
-        .game-star {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            z-index: 100;
-            filter: drop-shadow(0 0 10px gold);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 30px;
-            user-select: none;
-            animation: spawn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes spawn {
-            0% { transform: scale(0); }
-            100% { transform: scale(1); }
-        }
-
-        .fade-out { opacity: 0; pointer-events: none; }
+        body { color: var(--tg-theme-text-color); background: var(--tg-theme-bg-color); text-align: center; font-family: sans-serif; }
+        button { padding: 10px 20px; background: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color); border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <div class="background-stars" id="bg-stars"></div>
-
-    <div class="score-board" id="scoreBoard">SCORE: 0</div>
-
-    <div id="ui-layer">
-        <h1>STARS GAME</h1>
-        <button class="neon-button" id="startBtn">START MISSION</button>
-    </div>
+    <h1>В разработке блять</h1>
+    <p>Я сейчас ебашу эту хуйню чтобы ты мог здесь проебать свои звёзды, а теперь иди нахуй</p>
+    <button id="sendData">Отправить данные в бота</button>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Развернуть на все окно
 
-        let score = 0;
-        let gameInterval;
-        const uiLayer = document.getElementById('ui-layer');
-        const startBtn = document.getElementById('startBtn');
-        const scoreBoard = document.getElementById('scoreBoard');
-        const bgContainer = document.getElementById('bg-stars');
-
-        // 1. Создаем фоновые звезды
-        for (let i = 0; i < 50; i++) {
-            const s = document.createElement('div');
-            s.className = 'bg-star';
-            s.style.width = s.style.height = Math.random() * 3 + 'px';
-            s.style.left = Math.random() * 100 + '%';
-            s.style.top = Math.random() * 100 + '%';
-            s.style.animationDelay = Math.random() * 3 + 's';
-            bgContainer.appendChild(s);
-        }
-
-        // 2. Логика игры
-        function spawnGameStar() {
-            const star = document.createElement('div');
-            star.className = 'game-star';
-            star.innerHTML = '⭐'; // Можно заменить на картинку
-            
-            const x = Math.random() * (window.innerWidth - 50);
-            const y = Math.random() * (window.innerHeight - 100) + 50;
-            
-            star.style.left = x + 'px';
-            star.style.top = y + 'px';
-
-            star.onclick = (e) => {
-                e.stopPropagation();
-                score += 10;
-                scoreBoard.innerText = `SCORE: ${score}`;
-                star.remove();
-            };
-
-            document.body.appendChild(star);
-
-            // Удаляем звезду, если не успел нажать
-            setTimeout(() => {
-                if (star.parentNode) star.remove();
-            }, 1200);
-        }
-
-        function startGame() {
-            uiLayer.classList.add('fade-out'); // Прячем меню
-            scoreBoard.style.display = 'block'; // Показываем счет
-            score = 0;
-            scoreBoard.innerText = `SCORE: ${score}`;
-
-            // Показываем кнопку "Завершить" в интерфейсе Телеграма
-            tg.MainButton.setText("FINISH GAME");
-            tg.MainButton.show();
-            tg.MainButton.enable();
-
-            // Создаем звезды каждые 800мс
-            gameInterval = setInterval(spawnGameStar, 800);
-        }
-
-        // 3. Обработка событий
-        startBtn.addEventListener('click', startGame);
-
-        tg.MainButton.onClick(() => {
-            clearInterval(gameInterval);
-            tg.MainButton.hide();
-            
-            // Отправляем результат боту
-            tg.sendData(JSON.stringify({
-                score: score,
-                game: "stars_game"
-            }));
+        document.getElementById("sendData").addEventListener("click", () => {
+            let data = { message: "Hello from Mini App!" };
+            tg.sendData(JSON.stringify(data)); // Отправляет данные боту
+            tg.close(); // Закрывает приложение
         });
-
-        // Сообщаем Телеграму, что всё готово
-        tg.ready();
     </script>
 </body>
 </html>
