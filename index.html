@@ -1,178 +1,204 @@
-<!DOCTYPE html>
+
+           <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Stars Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon-color: #00FFFF; /* Цвет неона: бирюзовый */
-            --bg-color: #1a0033;   /* Темно-фиолетовый фон */
-            --text-color: #E0FFFF; /* Светлый текст */
-            --button-bg-color: #00BFFF; /* Ярко-синяя кнопка */
-            --button-text-color: #FFFFFF;
+            --neon-color: #00FFFF;
+            --bg-color: #0d001a;
+            --text-color: #ffffff;
         }
 
         body {
             margin: 0;
             padding: 0;
             height: 100vh;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Press Start 2P', cursive, sans-serif; /* Для ретро-стиля, если подключить */
-            overflow: hidden; /* Чтобы звезды не выходили за пределы */
-            position: relative;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
+            touch-action: manipulation;
         }
 
-        /* Звездный фон - анимация */
-        .stars {
+        /* Звездный фон (декоративный) */
+        .background-stars {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            background: transparent;
             z-index: 0;
-            pointer-events: none;
         }
 
-        .star {
+        .bg-star {
             position: absolute;
             background: white;
             border-radius: 50%;
-            animation: twinkle linear infinite;
-            opacity: 0;
+            opacity: 0.3;
+            animation: twinkle 3s infinite;
         }
-
-        /* Генерация звезд через JS или несколько стилей */
-        /* Пример для 3 слоев звезд */
-        .star:nth-child(3n) { width: 1px; height: 1px; animation-duration: 5s; animation-delay: calc(var(--i) * 0.1s); box-shadow: 0 0 2px var(--neon-color); }
-        .star:nth-child(3n + 1) { width: 2px; height: 2px; animation-duration: 7s; animation-delay: calc(var(--i) * 0.15s); box-shadow: 0 0 4px var(--neon-color); }
-        .star:nth-child(3n + 2) { width: 3px; height: 3px; animation-duration: 9s; animation-delay: calc(var(--i) * 0.2s); box-shadow: 0 0 6px var(--neon-color); }
 
         @keyframes twinkle {
-            0%, 100% { opacity: 0; transform: scale(0.5); }
-            50% { opacity: 1; transform: scale(1); }
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
         }
 
-        /* Неоновый заголовок */
-        h1 {
-            font-size: 3em;
-            text-shadow: 0 0 10px var(--neon-color), 0 0 20px var(--neon-color), 0 0 30px var(--neon-color), 0 0 40px var(--neon-color), 0 0 50px var(--neon-color), 0 0 60px var(--neon-color), 0 0 70px var(--neon-color);
-            animation: neon-flicker 1.5s ease-in-out infinite alternate;
-            margin-bottom: 40px;
-            color: #fff;
+        /* Интерфейс */
+        #ui-layer {
             position: relative;
-            z-index: 1;
+            z-index: 10;
+            text-align: center;
+            transition: opacity 0.5s ease;
         }
 
-        @keyframes neon-flicker {
-            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-                text-shadow: 
-                    0 0 10px var(--neon-color),
-                    0 0 20px var(--neon-color),
-                    0 0 30px var(--neon-color),
-                    0 0 40px var(--neon-color);
-                color: #fff;
-            }
-            20%, 24%, 55% {        
-                text-shadow: none;
-                color: #888;
-            }
+        h1 {
+            font-size: 24px;
+            text-shadow: 0 0 10px var(--neon-color), 0 0 20px var(--neon-color);
+            margin-bottom: 30px;
         }
 
-        /* Неоновая кнопка */
+        .score-board {
+            position: fixed;
+            top: 20px;
+            font-size: 14px;
+            color: var(--neon-color);
+            display: none; /* Скрыт до начала игры */
+        }
+
         .neon-button {
-            background-color: transparent;
+            background: transparent;
             border: 2px solid var(--neon-color);
             color: var(--neon-color);
-            padding: 15px 30px;
-            font-size: 1.2em;
-            text-transform: uppercase;
+            padding: 15px 25px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
             cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0 0 10px var(--neon-color), 0 0 20px var(--neon-color), 0 0 40px var(--neon-color);
-            position: relative;
-            z-index: 1;
-            overflow: hidden;
-            font-family: 'Press Start 2P', cursive, sans-serif; /* Для ретро-стиля */
+            box-shadow: 0 0 15px var(--neon-color);
+            border-radius: 5px;
         }
 
-        .neon-button:hover {
-            color: var(--button-text-color);
-            background-color: var(--neon-color);
-            box-shadow: 0 0 20px var(--neon-color), 0 0 40px var(--neon-color), 0 0 80px var(--neon-color);
-            transform: scale(1.05);
-        }
-
-        .neon-button::before {
-            content: '';
+        /* Игровые звезды (на которые надо нажимать) */
+        .game-star {
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: 0.5s;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            z-index: 100;
+            filter: drop-shadow(0 0 10px gold);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            user-select: none;
+            animation: spawn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .neon-button:hover::before {
-            left: 100%;
+        @keyframes spawn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
         }
 
-        /* Подключение шрифта Google Fonts (для ретро-стиля) */
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        .fade-out { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
-    <div class="stars" id="star-container"></div>
 
-    <h1>Stars Game</h1>
-    <button class="neon-button" id="startGameButton">Начать игру</button>
+    <div class="background-stars" id="bg-stars"></div>
+
+    <div class="score-board" id="scoreBoard">SCORE: 0</div>
+
+    <div id="ui-layer">
+        <h1>STARS GAME</h1>
+        <button class="neon-button" id="startBtn">START MISSION</button>
+    </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем приложение на весь экран
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-        // Применяем цветовую схему Telegram
-        document.documentElement.style.setProperty('--bg-color', tg.themeParams.bg_color || '#1a0033');
-        document.documentElement.style.setProperty('--text-color', tg.themeParams.text_color || '#E0FFFF');
-        document.documentElement.style.setProperty('--neon-color', tg.themeParams.link_color || '#00FFFF');
-        document.documentElement.style.setProperty('--button-bg-color', tg.themeParams.button_color || '#00BFFF');
-        document.documentElement.style.setProperty('--button-text-color', tg.themeParams.button_text_color || '#FFFFFF');
+        let score = 0;
+        let gameInterval;
+        const uiLayer = document.getElementById('ui-layer');
+        const startBtn = document.getElementById('startBtn');
+        const scoreBoard = document.getElementById('scoreBoard');
+        const bgContainer = document.getElementById('bg-stars');
 
-
-        // Генерация звезд
-        const starContainer = document.getElementById('star-container');
-        const numStars = 100; // Количество звезд
-
-        for (let i = 0; i < numStars; i++) {
-            let star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = `${Math.random() * 100}%`;
-            star.style.top = `${Math.random() * 100}%`;
-            star.style.setProperty('--i', i); // Передаем индекс для animation-delay
-            starContainer.appendChild(star);
+        // 1. Создаем фоновые звезды
+        for (let i = 0; i < 50; i++) {
+            const s = document.createElement('div');
+            s.className = 'bg-star';
+            s.style.width = s.style.height = Math.random() * 3 + 'px';
+            s.style.left = Math.random() * 100 + '%';
+            s.style.top = Math.random() * 100 + '%';
+            s.style.animationDelay = Math.random() * 3 + 's';
+            bgContainer.appendChild(s);
         }
 
+        // 2. Логика игры
+        function spawnGameStar() {
+            const star = document.createElement('div');
+            star.className = 'game-star';
+            star.innerHTML = '⭐'; // Можно заменить на картинку
+            
+            const x = Math.random() * (window.innerWidth - 50);
+            const y = Math.random() * (window.innerHeight - 100) + 50;
+            
+            star.style.left = x + 'px';
+            star.style.top = y + 'px';
 
-        document.getElementById("startGameButton").addEventListener("click", () => {
-            // Здесь можно будет начать твою игру
-            alert("Игра началась! (пока что)"); 
-            // Пример отправки данных в бота (можно убрать, если игра будет внутри мини-аппа)
-            // tg.sendData(JSON.stringify({ action: "start_game", level: 1 }));
-            // tg.close(); // Закрыть мини-апп после начала игры (или оставить открытым)
+            star.onclick = (e) => {
+                e.stopPropagation();
+                score += 10;
+                scoreBoard.innerText = `SCORE: ${score}`;
+                star.remove();
+            };
+
+            document.body.appendChild(star);
+
+            // Удаляем звезду, если не успел нажать
+            setTimeout(() => {
+                if (star.parentNode) star.remove();
+            }, 1200);
+        }
+
+        function startGame() {
+            uiLayer.classList.add('fade-out'); // Прячем меню
+            scoreBoard.style.display = 'block'; // Показываем счет
+            score = 0;
+            scoreBoard.innerText = `SCORE: ${score}`;
+
+            // Показываем кнопку "Завершить" в интерфейсе Телеграма
+            tg.MainButton.setText("FINISH GAME");
+            tg.MainButton.show();
+            tg.MainButton.enable();
+
+            // Создаем звезды каждые 800мс
+            gameInterval = setInterval(spawnGameStar, 800);
+        }
+
+        // 3. Обработка событий
+        startBtn.addEventListener('click', startGame);
+
+        tg.MainButton.onClick(() => {
+            clearInterval(gameInterval);
+            tg.MainButton.hide();
+            
+            // Отправляем результат боту
+            tg.sendData(JSON.stringify({
+                score: score,
+                game: "stars_game"
+            }));
         });
+
+        // Сообщаем Телеграму, что всё готово
+        tg.ready();
     </script>
 </body>
 </html>
