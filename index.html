@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎰 Lucky Stars Casino</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Весь твой оригинальный CSS без изменений */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); color: white; min-height: 100vh; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
+        .container { max-width: 800px; margin: 0 auto; padding-bottom: 80px; } /* Добавил отступ снизу */
         .header { text-align: center; padding: 25px; background: rgba(255, 255, 255, 0.08); border-radius: 20px; margin-bottom: 25px; }
         .logo { font-size: 48px; margin-bottom: 10px; text-shadow: 0 0 20px #ffd700; }
         .title { font-size: 28px; font-weight: 700; margin-bottom: 10px; background: linear-gradient(45deg, #ffd700, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -26,6 +28,19 @@
         .card { background: rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 30px; margin-bottom: 25px; text-align: center; }
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group input { width: 100%; padding: 15px; border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 16px; }
+        
+        /* Стили для кнопки сохранения (внизу) */
+        .save-bar {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 600px; z-index: 100;
+        }
+        .btn-save {
+            background: linear-gradient(45deg, #6200ea, #b388ff); 
+            color: white; 
+            width: 100%;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+
         @media (max-width: 768px) { .action-buttons { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -34,17 +49,17 @@
         <div class="header">
             <div class="logo">🎰</div>
             <h1 class="title">Lucky Stars Casino</h1>
-            <p>Простая синхронизация через User ID</p>
+            <p id="statusText">Загрузка...</p>
         </div>
 
-        <div id="registrationForm" class="card">
+        <div id="registrationForm" class="card" style="display: none;">
             <h2><i class="fas fa-user-plus"></i> Регистрация</h2>
             <div class="input-group">
                 <label for="username"><i class="fas fa-user"></i> Имя пользователя</label>
                 <input type="text" id="username" placeholder="Введите ваше имя" maxlength="20">
             </div>
             <button class="btn btn-primary" onclick="registerUser()" style="width: 100%; margin-top: 20px;">
-                <i class="fas fa-user-check"></i> Зарегистрироваться
+                <i class="fas fa-user-check"></i> Играть локально
             </button>
         </div>
 
@@ -106,45 +121,90 @@
                     <p style="text-align: center; opacity: 0.7; padding: 20px;">История игр пуста</p>
                 </div>
             </div>
-
-            <div class="card" style="margin-top: 20px;">
-                <h3><i class="fas fa-sync-alt"></i> Синхронизация с ботом</h3>
-                <p>Ваш уникальный User ID:</p>
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <input type="text" id="userIdDisplay" readonly 
-                           style="flex: 1; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid #4fc3f7; border-radius: 8px; color: white; font-family: monospace;">
-                    <button class="btn btn-primary" onclick="copyUserId()" style="padding: 12px 20px;">
-                        <i class="fas fa-copy"></i> Копировать
-                    </button>
-                </div>
-                <p style="margin-top: 10px; font-size: 12px; opacity: 0.7;">
-                    Отправьте боту в Telegram:<br>
-                    <code>sync:ВАШ_USER_ID</code><br>
-                    или<br>
-                    <code>/sync ВАШ_USER_ID</code>
-                </p>
-            </div>
+            
+            <div style="height: 60px;"></div>
         </div>
     </div>
 
+    <div class="save-bar" id="saveBar" style="display: none;">
+        <button class="btn btn-save" onclick="saveToTelegram()">
+            <i class="fas fa-cloud-upload-alt"></i> СОХРАНИТЬ В TELEGRAM
+        </button>
+    </div>
+
     <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Раскрываем на весь экран
+
         let userId = null;
         let userData = null;
+        
+        // Для отслеживания прогресса текущей сессии
+        let sessionStats = {
+            games: 0,
+            wins: 0
+        };
 
-        function generateUserId() {
-            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        // --- Инициализация ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const botUid = urlParams.get('uid');
+            const botStars = urlParams.get('stars');
+            const botSpins = urlParams.get('spins');
+
+            if (botUid) {
+                // РЕЖИМ: Запущено из Telegram Бота
+                userId = botUid;
+                userData = {
+                    username: "Игрок",
+                    stars: parseInt(botStars) || 0,
+                    free_spins: parseInt(botSpins) || 0,
+                    total_wins: 0, // В этой сессии
+                    total_games: 0, // В этой сессии
+                    win_streak: 0,
+                    game_history: []
+                };
+                
+                document.getElementById('statusText').innerText = "Синхронизировано с Telegram";
+                document.getElementById('registrationForm').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                document.getElementById('saveBar').style.display = 'block';
+                updateUI();
+            } else {
+                // РЕЖИМ: Обычный браузер (или старая версия)
+                document.getElementById('statusText').innerText = "Локальный режим";
+                if (loadLocalData()) {
+                    // Данные есть в LocalStorage
+                } else {
+                    document.getElementById('registrationForm').style.display = 'block';
+                }
+            }
+        });
+
+        // --- Функция сохранения в Telegram ---
+        function saveToTelegram() {
+            if (!userId) return;
+
+            const dataToSend = {
+                action: 'save_progress',
+                stars: userData.stars,
+                free_spins: userData.free_spins,
+                session_games: sessionStats.games,
+                session_wins: sessionStats.wins
+            };
+
+            // Отправляем данные боту
+            tg.sendData(JSON.stringify(dataToSend));
+            // tg.close(); // Можно раскомментировать, если нужно сразу закрывать
         }
+
+        // --- Старые функции (немного модифицированные для учета сессии) ---
 
         function registerUser() {
             const username = document.getElementById('username').value.trim();
+            if (!username) { alert("Введите имя!"); return; }
             
-            if (!username) {
-                alert("Введите имя пользователя!");
-                return;
-            }
-            
-            userId = generateUserId();
-            
+            userId = 'local_' + Date.now();
             userData = {
                 username: username,
                 stars: 50,
@@ -152,66 +212,56 @@
                 total_wins: 0,
                 total_games: 0,
                 win_streak: 0,
-                registration_date: new Date().toISOString(),
                 game_history: []
             };
             
-            saveUserData();
-            
+            saveLocalData();
             document.getElementById('registrationForm').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
-            
             updateUI();
-            
-            alert(`✅ Регистрация успешна!\n\nИмя: ${username}\nUser ID: ${userId}\n\nСкопируйте User ID и отправьте боту:\nsync:${userId}`);
         }
 
-        function loadUserData() {
-            const savedUserId = localStorage.getItem('casino_user_id');
+        function loadLocalData() {
             const savedData = localStorage.getItem('casino_user_data');
-            
-            if (savedUserId && savedData) {
-                userId = savedUserId;
+            if (savedData) {
                 userData = JSON.parse(savedData);
-                
+                userId = localStorage.getItem('casino_user_id');
                 document.getElementById('registrationForm').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
-                
                 updateUI();
                 return true;
             }
             return false;
         }
 
-        function saveUserData() {
+        function saveLocalData() {
+            // Сохраняем локально только если НЕ в телеграме (или как бэкап)
             if (userId && userData) {
                 localStorage.setItem('casino_user_id', userId);
                 localStorage.setItem('casino_user_data', JSON.stringify(userData));
-                return true;
             }
-            return false;
         }
 
         function updateUI() {
             if (!userData) return;
-            
             document.getElementById('starsBalance').textContent = userData.stars;
             document.getElementById('freeSpinsText').textContent = `Бесплатных круток: ${userData.free_spins}`;
             document.getElementById('freeSpinsCounter').textContent = userData.free_spins;
-            document.getElementById('totalWins').textContent = userData.total_wins;
+            // Показываем общую статистику (если из бота - то сессионную + то что пришло, но мы пока показываем сессионную для простоты)
+            document.getElementById('totalWins').textContent = userData.total_wins; 
             document.getElementById('totalGames').textContent = userData.total_games;
             document.getElementById('winStreak').textContent = userData.win_streak;
             document.getElementById('userId').textContent = `ID: ${userId}`;
-            document.getElementById('userIdDisplay').value = userId;
         }
 
         function playFreeSpin() {
             if (!userData || userData.free_spins <= 0) {
-                alert("У вас закончились бесплатные крутки!");
+                tg.showAlert("У вас закончились бесплатные крутки!"); // Используем нативный алерт
                 return;
             }
             
             userData.total_games++;
+            sessionStats.games++;
             userData.free_spins--;
             
             const isWin = Math.random() < 0.15;
@@ -220,38 +270,27 @@
                 const winAmount = Math.floor(Math.random() * 10) + 1;
                 userData.stars += winAmount;
                 userData.total_wins++;
+                sessionStats.wins++;
                 userData.win_streak++;
-                
-                userData.game_history.push({
-                    type: 'win',
-                    amount: winAmount,
-                    timestamp: new Date().toISOString()
-                });
-                
+                tg.HapticFeedback.notificationOccurred('success'); // Вибрация
                 alert(`🎉 Победа! Вы выиграли ${winAmount} ⭐!`);
             } else {
                 userData.win_streak = 0;
-                
-                userData.game_history.push({
-                    type: 'loss',
-                    amount: 0,
-                    timestamp: new Date().toISOString()
-                });
-                
+                tg.HapticFeedback.impactOccurred('light'); // Легкая вибрация
                 alert("❌ Проигрыш. Повезёт в следующий раз!");
             }
-            
-            saveUserData();
+            saveLocalData();
             updateUI();
         }
 
         function playForStars() {
             if (!userData || userData.stars < 1) {
-                alert("Недостаточно звёзд!");
+                tg.showAlert("Недостаточно звёзд!");
                 return;
             }
             
             userData.total_games++;
+            sessionStats.games++;
             
             const isWin = Math.random() < 0.15;
             
@@ -259,39 +298,28 @@
                 const winAmount = Math.floor(Math.random() * 5) + 2;
                 userData.stars += winAmount - 1;
                 userData.total_wins++;
+                sessionStats.wins++;
                 userData.win_streak++;
-                
-                userData.game_history.push({
-                    type: 'win',
-                    amount: winAmount,
-                    timestamp: new Date().toISOString()
-                });
-                
-                alert(`💰 Выигрыш! Вы выиграли ${winAmount} ⭐ (чистая прибыль: ${winAmount-1} ⭐)`);
+                tg.HapticFeedback.notificationOccurred('success');
+                alert(`💰 Выигрыш! +${winAmount-1} ⭐`);
             } else {
                 userData.stars--;
                 userData.win_streak = 0;
-                
-                userData.game_history.push({
-                    type: 'loss',
-                    amount: 1,
-                    timestamp: new Date().toISOString()
-                });
-                
-                alert("❌ Проигрыш. Вы проиграли 1 ⭐");
+                tg.HapticFeedback.impactOccurred('heavy');
+                alert("❌ Проигрыш. -1 ⭐");
             }
-            
-            saveUserData();
+            saveLocalData();
             updateUI();
         }
 
         function playDice() {
             if (!userData || userData.stars < 1) {
-                alert("Недостаточно звёзд!");
+                tg.showAlert("Недостаточно звёзд!");
                 return;
             }
             
             userData.total_games++;
+            sessionStats.games++;
             
             const diceValue = Math.floor(Math.random() * 6) + 1;
             const isWin = diceValue >= 5;
@@ -300,56 +328,19 @@
                 const winAmount = 3;
                 userData.stars += winAmount - 1;
                 userData.total_wins++;
+                sessionStats.wins++;
                 userData.win_streak++;
-                
-                userData.game_history.push({
-                    type: 'win',
-                    amount: winAmount,
-                    timestamp: new Date().toISOString()
-                });
-                
-                alert(`🎲 Победа! Выпало ${diceValue}. Выигрыш: ${winAmount} ⭐`);
+                tg.HapticFeedback.notificationOccurred('success');
+                alert(`🎲 Выпало ${diceValue}. Выигрыш: +2 ⭐`);
             } else {
                 userData.stars--;
                 userData.win_streak = 0;
-                
-                userData.game_history.push({
-                    type: 'loss',
-                    amount: 1,
-                    timestamp: new Date().toISOString()
-                });
-                
-                alert(`🎲 Проигрыш. Выпало ${diceValue}. Вы проиграли 1 ⭐`);
+                tg.HapticFeedback.impactOccurred('heavy');
+                alert(`🎲 Выпало ${diceValue}. Проигрыш -1 ⭐`);
             }
-            
-            saveUserData();
+            saveLocalData();
             updateUI();
         }
-
-        function copyUserId() {
-            const userIdInput = document.getElementById('userIdDisplay');
-            userIdInput.select();
-            userIdInput.setSelectionRange(0, 99999);
-            
-            navigator.clipboard.writeText(userIdInput.value)
-                .then(() => {
-                    alert("User ID скопирован!\n\nОтправьте боту в Telegram:\nsync:" + userIdInput.value);
-                })
-                .catch(err => {
-                    console.error('Ошибка копирования:', err);
-                });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const hasData = loadUserData();
-            
-            if (!hasData) {
-                document.getElementById('registrationForm').style.display = 'block';
-                document.getElementById('mainContent').style.display = 'none';
-            }
-        });
     </script>
 </body>
 </html>
-
-
