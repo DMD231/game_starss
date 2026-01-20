@@ -7,41 +7,56 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Весь твой оригинальный CSS без изменений */
+        /* (Стили те же самые, добавлен только стиль для кнопки пополнения) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); color: white; min-height: 100vh; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; padding-bottom: 80px; } /* Добавил отступ снизу */
+        .container { max-width: 800px; margin: 0 auto; padding-bottom: 80px; }
+        
         .header { text-align: center; padding: 25px; background: rgba(255, 255, 255, 0.08); border-radius: 20px; margin-bottom: 25px; }
         .logo { font-size: 48px; margin-bottom: 10px; text-shadow: 0 0 20px #ffd700; }
         .title { font-size: 28px; font-weight: 700; margin-bottom: 10px; background: linear-gradient(45deg, #ffd700, #ff6b6b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .balance-card { background: linear-gradient(45deg, #ff6b6b, #ffa726, #ffd700); border-radius: 18px; padding: 25px; margin-bottom: 25px; }
+        
+        .balance-card { position: relative; background: linear-gradient(45deg, #ff6b6b, #ffa726, #ffd700); border-radius: 18px; padding: 25px; margin-bottom: 25px; }
         .balance-amount { font-size: 42px; font-weight: 800; display: flex; align-items: center; gap: 12px; }
+        
+        /* Кнопка пополнения внутри карточки баланса */
+        .btn-deposit {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: rgba(255,255,255,0.25);
+            border: 2px solid white;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+        .btn-deposit:active { transform: scale(0.95); background: rgba(255,255,255,0.4); }
+
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-bottom: 30px; }
         .stat-card { background: rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 22px; text-align: center; }
         .stat-value { font-size: 34px; font-weight: 800; margin: 10px 0; color: #4fc3f7; }
+        
         .action-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; margin-bottom: 30px; }
         .btn { padding: 22px 20px; border: none; border-radius: 15px; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; }
         .btn-primary { background: linear-gradient(45deg, #2196f3, #21cbf3); color: white; }
         .btn-success { background: linear-gradient(45deg, #4caf50, #8bc34a); color: white; }
         .btn-warning { background: linear-gradient(45deg, #ff9800, #ffc107); color: white; }
+        
         .history-section { background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 25px; margin-top: 30px; }
         .card { background: rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 30px; margin-bottom: 25px; text-align: center; }
         .input-group { margin-bottom: 20px; text-align: left; }
         .input-group input { width: 100%; padding: 15px; border: 2px solid rgba(255, 215, 0, 0.3); border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: white; font-size: 16px; }
-        
-        /* Стили для кнопки сохранения (внизу) */
-        .save-bar {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 600px; z-index: 100;
-        }
-        .btn-save {
-            background: linear-gradient(45deg, #6200ea, #b388ff); 
-            color: white; 
-            width: 100%;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-        }
 
-        @media (max-width: 768px) { .action-buttons { grid-template-columns: 1fr; } }
+        .save-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; z-index: 100; }
+        .btn-save { background: linear-gradient(45deg, #6200ea, #b388ff); color: white; width: 100%; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -65,6 +80,10 @@
 
         <div id="mainContent" style="display: none;">
             <div class="balance-card">
+                <button class="btn-deposit" onclick="requestDeposit()">
+                    <i class="fas fa-plus-circle"></i> ПОПОЛНИТЬ
+                </button>
+                
                 <div class="balance-info">
                     <h3><i class="fas fa-coins"></i> Ваш баланс</h3>
                     <div class="balance-amount">
@@ -134,18 +153,12 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрываем на весь экран
+        tg.expand();
 
         let userId = null;
         let userData = null;
-        
-        // Для отслеживания прогресса текущей сессии
-        let sessionStats = {
-            games: 0,
-            wins: 0
-        };
+        let sessionStats = { games: 0, wins: 0 };
 
-        // --- Инициализация ---
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const botUid = urlParams.get('uid');
@@ -153,38 +166,45 @@
             const botSpins = urlParams.get('spins');
 
             if (botUid) {
-                // РЕЖИМ: Запущено из Telegram Бота
                 userId = botUid;
                 userData = {
                     username: "Игрок",
                     stars: parseInt(botStars) || 0,
                     free_spins: parseInt(botSpins) || 0,
-                    total_wins: 0, // В этой сессии
-                    total_games: 0, // В этой сессии
+                    total_wins: 0, 
+                    total_games: 0, 
                     win_streak: 0,
                     game_history: []
                 };
-                
-                document.getElementById('statusText').innerText = "Синхронизировано с Telegram";
+                document.getElementById('statusText').innerText = "Синхронизировано";
                 document.getElementById('registrationForm').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
                 document.getElementById('saveBar').style.display = 'block';
                 updateUI();
             } else {
-                // РЕЖИМ: Обычный браузер (или старая версия)
                 document.getElementById('statusText').innerText = "Локальный режим";
-                if (loadLocalData()) {
-                    // Данные есть в LocalStorage
-                } else {
+                if (loadLocalData()) {} else {
                     document.getElementById('registrationForm').style.display = 'block';
                 }
             }
         });
 
-        // --- Функция сохранения в Telegram ---
+        // --- НОВАЯ ФУНКЦИЯ: ЗАПРОС НА ПОПОЛНЕНИЕ ---
+        function requestDeposit() {
+            if (!userId || userId.startsWith('local_')) {
+                alert("Пополнение доступно только при входе через Бота!");
+                return;
+            }
+            // Отправляем боту спец. сигнал
+            tg.sendData(JSON.stringify({
+                action: 'open_shop_request',
+                stars: userData.stars // Сохраняем текущий прогресс на всякий случай
+            }));
+            // tg.close(); // Можно закрыть приложение, чтобы юзер увидел счет
+        }
+
         function saveToTelegram() {
             if (!userId) return;
-
             const dataToSend = {
                 action: 'save_progress',
                 stars: userData.stars,
@@ -192,29 +212,17 @@
                 session_games: sessionStats.games,
                 session_wins: sessionStats.wins
             };
-
-            // Отправляем данные боту
             tg.sendData(JSON.stringify(dataToSend));
-            // tg.close(); // Можно раскомментировать, если нужно сразу закрывать
         }
-
-        // --- Старые функции (немного модифицированные для учета сессии) ---
 
         function registerUser() {
             const username = document.getElementById('username').value.trim();
             if (!username) { alert("Введите имя!"); return; }
-            
             userId = 'local_' + Date.now();
             userData = {
-                username: username,
-                stars: 50,
-                free_spins: 3,
-                total_wins: 0,
-                total_games: 0,
-                win_streak: 0,
-                game_history: []
+                username: username, stars: 50, free_spins: 3,
+                total_wins: 0, total_games: 0, win_streak: 0, game_history: []
             };
-            
             saveLocalData();
             document.getElementById('registrationForm').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
@@ -235,7 +243,6 @@
         }
 
         function saveLocalData() {
-            // Сохраняем локально только если НЕ в телеграме (или как бэкап)
             if (userId && userData) {
                 localStorage.setItem('casino_user_id', userId);
                 localStorage.setItem('casino_user_data', JSON.stringify(userData));
@@ -247,7 +254,6 @@
             document.getElementById('starsBalance').textContent = userData.stars;
             document.getElementById('freeSpinsText').textContent = `Бесплатных круток: ${userData.free_spins}`;
             document.getElementById('freeSpinsCounter').textContent = userData.free_spins;
-            // Показываем общую статистику (если из бота - то сессионную + то что пришло, но мы пока показываем сессионную для простоты)
             document.getElementById('totalWins').textContent = userData.total_wins; 
             document.getElementById('totalGames').textContent = userData.total_games;
             document.getElementById('winStreak').textContent = userData.win_streak;
@@ -255,91 +261,55 @@
         }
 
         function playFreeSpin() {
-            if (!userData || userData.free_spins <= 0) {
-                tg.showAlert("У вас закончились бесплатные крутки!"); // Используем нативный алерт
-                return;
-            }
-            
-            userData.total_games++;
-            sessionStats.games++;
-            userData.free_spins--;
-            
+            if (!userData || userData.free_spins <= 0) { tg.showAlert("Нет круток!"); return; }
+            userData.total_games++; sessionStats.games++; userData.free_spins--;
             const isWin = Math.random() < 0.15;
-            
             if (isWin) {
                 const winAmount = Math.floor(Math.random() * 10) + 1;
-                userData.stars += winAmount;
-                userData.total_wins++;
-                sessionStats.wins++;
-                userData.win_streak++;
-                tg.HapticFeedback.notificationOccurred('success'); // Вибрация
-                alert(`🎉 Победа! Вы выиграли ${winAmount} ⭐!`);
+                userData.stars += winAmount; userData.total_wins++; sessionStats.wins++; userData.win_streak++;
+                tg.HapticFeedback.notificationOccurred('success');
+                alert(`🎉 Победа! +${winAmount} ⭐!`);
             } else {
                 userData.win_streak = 0;
-                tg.HapticFeedback.impactOccurred('light'); // Легкая вибрация
-                alert("❌ Проигрыш. Повезёт в следующий раз!");
+                tg.HapticFeedback.impactOccurred('light');
+                alert("❌ Проигрыш.");
             }
-            saveLocalData();
-            updateUI();
+            saveLocalData(); updateUI();
         }
 
         function playForStars() {
-            if (!userData || userData.stars < 1) {
-                tg.showAlert("Недостаточно звёзд!");
-                return;
-            }
-            
-            userData.total_games++;
-            sessionStats.games++;
-            
+            if (!userData || userData.stars < 1) { tg.showAlert("Мало звёзд!"); return; }
+            userData.total_games++; sessionStats.games++;
             const isWin = Math.random() < 0.15;
-            
             if (isWin) {
                 const winAmount = Math.floor(Math.random() * 5) + 2;
-                userData.stars += winAmount - 1;
-                userData.total_wins++;
-                sessionStats.wins++;
-                userData.win_streak++;
+                userData.stars += winAmount - 1; userData.total_wins++; sessionStats.wins++; userData.win_streak++;
                 tg.HapticFeedback.notificationOccurred('success');
                 alert(`💰 Выигрыш! +${winAmount-1} ⭐`);
             } else {
-                userData.stars--;
-                userData.win_streak = 0;
+                userData.stars--; userData.win_streak = 0;
                 tg.HapticFeedback.impactOccurred('heavy');
-                alert("❌ Проигрыш. -1 ⭐");
+                alert("❌ Проигрыш -1 ⭐");
             }
-            saveLocalData();
-            updateUI();
+            saveLocalData(); updateUI();
         }
 
         function playDice() {
-            if (!userData || userData.stars < 1) {
-                tg.showAlert("Недостаточно звёзд!");
-                return;
-            }
-            
-            userData.total_games++;
-            sessionStats.games++;
-            
+            if (!userData || userData.stars < 1) { tg.showAlert("Мало звёзд!"); return; }
+            userData.total_games++; sessionStats.games++;
             const diceValue = Math.floor(Math.random() * 6) + 1;
             const isWin = diceValue >= 5;
-            
             if (isWin) {
                 const winAmount = 3;
-                userData.stars += winAmount - 1;
-                userData.total_wins++;
-                sessionStats.wins++;
-                userData.win_streak++;
+                userData.stars += winAmount - 1; userData.total_wins++; sessionStats.wins++; userData.win_streak++;
                 tg.HapticFeedback.notificationOccurred('success');
-                alert(`🎲 Выпало ${diceValue}. Выигрыш: +2 ⭐`);
+                alert(`🎲 Выпало ${diceValue}. Выигрыш +2 ⭐`);
             } else {
-                userData.stars--;
-                userData.win_streak = 0;
+                userData.stars--; userData.win_streak = 0;
                 tg.HapticFeedback.impactOccurred('heavy');
                 alert(`🎲 Выпало ${diceValue}. Проигрыш -1 ⭐`);
             }
-            saveLocalData();
-            updateUI();
+            saveLocalData(); updateUI();
         }
     </script>
 </body>
