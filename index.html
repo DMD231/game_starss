@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -7,6 +6,7 @@
     <title>🎰 Lucky Stars Casino</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Все стили из предыдущего красивого дизайна сохраняем */
         * {
             margin: 0;
             padding: 0;
@@ -442,6 +442,50 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Registration Form */
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .action-buttons {
@@ -478,93 +522,127 @@
         <div class="header">
             <div class="logo">🎰</div>
             <h1 class="title">Lucky Stars Casino</h1>
-            <p class="subtitle">Испытай удачу в нашем казино с шансом выигрыша 15%! Играй ответственно.</p>
+            <p class="subtitle">Испытай удачу! Все данные сохраняются в вашем браузере и синхронизируются с ботом.</p>
         </div>
 
-        <!-- Balance Card -->
-        <div class="balance-card">
-            <div class="balance-info">
-                <h3><i class="fas fa-coins"></i> Ваш баланс</h3>
-                <div class="balance-amount">
-                    <span id="starsBalance">0</span>
-                    <i class="fas fa-star stars-icon"></i>
-                </div>
-                <p id="freeSpinsText">Бесплатных круток: 0</p>
+        <!-- Registration Form (показывается если нет user_id) -->
+        <div id="registrationForm" class="card">
+            <h2><i class="fas fa-user-plus"></i> Регистрация</h2>
+            <p>Для начала игры создайте свой игровой профиль:</p>
+            
+            <div class="input-group">
+                <label for="username"><i class="fas fa-user"></i> Имя пользователя</label>
+                <input type="text" id="username" placeholder="Введите ваше имя" maxlength="20">
             </div>
-            <button class="refresh-btn" onclick="loadUserData()">
-                <i class="fas fa-sync-alt"></i>
+            
+            <div class="input-group">
+                <label for="telegramId"><i class="fab fa-telegram"></i> Telegram ID (опционально)</label>
+                <input type="number" id="telegramId" placeholder="Ваш ID в Telegram">
+            </div>
+            
+            <button class="btn btn-primary" onclick="registerUser()" style="width: 100%; margin-top: 20px;">
+                <i class="fas fa-user-check"></i> Зарегистрироваться и начать играть
             </button>
+            
+            <p id="registrationStatus" style="margin-top: 15px; color: #4fc3f7;"></p>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <i class="fas fa-trophy"></i>
-                <div class="stat-value" id="totalWins">0</div>
-                <div class="stat-label">Побед</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-dice"></i>
-                <div class="stat-value" id="totalGames">0</div>
-                <div class="stat-label">Всего игр</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-percentage"></i>
-                <div class="stat-value">15%</div>
-                <div class="stat-label">Шанс выигрыша</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-fire"></i>
-                <div class="stat-value" id="winStreak">0</div>
-                <div class="stat-label">Серия побед</div>
-            </div>
-        </div>
-
-        <!-- Games Section -->
-        <div class="games-section">
-            <h2 class="section-title"><i class="fas fa-gamepad"></i> Доступные игры</h2>
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="playFreeSpin()">
-                    <i class="fas fa-gift"></i> Бесплатная крутка
-                    <span id="freeSpinsCounter" style="background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 20px;">0</span>
-                </button>
-                <button class="btn btn-success" onclick="playForStars()">
-                    <i class="fas fa-star"></i> Играть за 1 ⭐
-                </button>
-                <button class="btn btn-warning" onclick="playDice()">
-                    <i class="fas fa-dice"></i> Кости (15% шанс)
-                </button>
-                <button class="btn btn-danger" onclick="buyStars()">
-                    <i class="fas fa-shopping-cart"></i> Купить звёзды
-                </button>
-            </div>
-        </div>
-
-        <!-- History -->
-        <div class="history-section">
-            <div class="history-title">
-                <h3><i class="fas fa-history"></i> История игр</h3>
-                <button class="refresh-btn" style="width: 40px; height: 40px;" onclick="loadGameHistory()">
-                    <i class="fas fa-redo"></i>
-                </button>
-            </div>
-            <div class="history-list" id="gameHistory">
-                <div class="history-item win">
-                    <span><i class="fas fa-check-circle" style="color: #4caf50;"></i> Вы выиграли 5 ⭐</span>
-                    <span>10.05.2023 15:30</span>
+        <!-- Main Content (показывается после регистрации) -->
+        <div id="mainContent" style="display: none;">
+            <!-- Balance Card -->
+            <div class="balance-card">
+                <div class="balance-info">
+                    <h3><i class="fas fa-coins"></i> Ваш баланс</h3>
+                    <div class="balance-amount">
+                        <span id="starsBalance">0</span>
+                        <i class="fas fa-star stars-icon"></i>
+                    </div>
+                    <p id="freeSpinsText">Бесплатных круток: 0</p>
+                    <p id="userId" style="font-size: 12px; opacity: 0.7; margin-top: 5px;"></p>
                 </div>
-                <div class="history-item loss">
-                    <span><i class="fas fa-times-circle" style="color: #f44336;"></i> Вы проиграли 1 ⭐</span>
-                    <span>10.05.2023 14:15</span>
+                <button class="refresh-btn" onclick="loadUserData()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-trophy"></i>
+                    <div class="stat-value" id="totalWins">0</div>
+                    <div class="stat-label">Побед</div>
                 </div>
-                <!-- История будет загружаться динамически -->
+                <div class="stat-card">
+                    <i class="fas fa-dice"></i>
+                    <div class="stat-value" id="totalGames">0</div>
+                    <div class="stat-label">Всего игр</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-percentage"></i>
+                    <div class="stat-value">15%</div>
+                    <div class="stat-label">Шанс выигрыша</div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-fire"></i>
+                    <div class="stat-value" id="winStreak">0</div>
+                    <div class="stat-label">Серия побед</div>
+                </div>
+            </div>
+
+            <!-- Games Section -->
+            <div class="games-section">
+                <h2 class="section-title"><i class="fas fa-gamepad"></i> Доступные игры</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="playFreeSpin()">
+                        <i class="fas fa-gift"></i> Бесплатная крутка
+                        <span id="freeSpinsCounter" style="background: rgba(255,255,255,0.2); padding: 2px 10px; border-radius: 20px;">0</span>
+                    </button>
+                    <button class="btn btn-success" onclick="playForStars()">
+                        <i class="fas fa-star"></i> Играть за 1 ⭐
+                    </button>
+                    <button class="btn btn-warning" onclick="playDice()">
+                        <i class="fas fa-dice"></i> Кости (15% шанс)
+                    </button>
+                    <button class="btn btn-danger" onclick="exportData()">
+                        <i class="fas fa-download"></i> Экспорт данных
+                    </button>
+                </div>
+            </div>
+
+            <!-- History -->
+            <div class="history-section">
+                <div class="history-title">
+                    <h3><i class="fas fa-history"></i> История игр</h3>
+                    <button class="refresh-btn" style="width: 40px; height: 40px;" onclick="loadGameHistory()">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+                <div class="history-list" id="gameHistory">
+                    <!-- История будет загружаться динамически -->
+                </div>
+            </div>
+
+            <!-- Export Section -->
+            <div class="card" style="margin-top: 20px;">
+                <h3><i class="fas fa-sync-alt"></i> Синхронизация с ботом</h3>
+                <p>Скопируйте ваш ID и отправьте боту для синхронизации:</p>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <input type="text" id="syncCode" readonly 
+                           style="flex: 1; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid #4fc3f7; border-radius: 8px; color: white;">
+                    <button class="btn btn-primary" onclick="copySyncCode()" style="padding: 12px 20px;">
+                        <i class="fas fa-copy"></i> Копировать
+                    </button>
+                </div>
+                <p style="margin-top: 10px; font-size: 12px; opacity: 0.7;">
+                    Отправьте этот код боту командой: <code>/sync ВАШ_КОД</code>
+                </p>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p>© 2023 Lucky Stars Casino. Все права защищены.</p>
-            <p>Играйте ответственно. Минимальный возраст: 18 лет.</p>
+            <p>© 2023 Lucky Stars Casino. Все данные хранятся в вашем браузере.</p>
+            <p>Для синхронизации между устройствами используйте код синхронизации.</p>
         </div>
     </div>
 
@@ -579,64 +657,160 @@
         </div>
     </div>
 
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('exportModal')">&times;</span>
+            <h2 style="text-align: center;"><i class="fas fa-download"></i> Экспорт данных</h2>
+            <p>Скопируйте ваш игровой профиль для переноса на другое устройство:</p>
+            <textarea id="exportData" readonly style="width: 100%; height: 150px; margin: 15px 0; padding: 15px; background: rgba(255,255,255,0.1); border: 1px solid #4fc3f7; border-radius: 10px; color: white; resize: none;"></textarea>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-success" onclick="copyExportData()" style="flex: 1;">
+                    <i class="fas fa-copy"></i> Копировать
+                </button>
+                <button class="btn btn-danger" onclick="closeModal('exportModal')" style="flex: 1;">
+                    <i class="fas fa-times"></i> Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="loading" class="loading">
         <div class="spinner"></div>
-        <p>Загрузка...</p>
+        <p id="loadingText">Загрузка...</p>
     </div>
 
     <script>
+        // Глобальные переменные
+        let userId = null;
+        let userData = null;
+        let tg = null;
+
         // Инициализация Telegram WebApp
-        let tg = window.Telegram.WebApp;
-        
-        // Расширяем WebApp на весь экран
-        tg.expand();
-        
-        // Получаем user_id из параметров запуска
-        let userId = tg.initDataUnsafe.user?.id || 123456789;
-        let userData = {};
+        function initTelegramWebApp() {
+            if (window.Telegram && Telegram.WebApp) {
+                tg = Telegram.WebApp;
+                tg.expand();
+                tg.enableClosingConfirmation();
+                return true;
+            }
+            return false;
+        }
+
+        // Генерация уникального ID пользователя
+        function generateUserId() {
+            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Регистрация пользователя
+        function registerUser() {
+            const username = document.getElementById('username').value.trim();
+            const telegramId = document.getElementById('telegramId').value.trim();
+            
+            if (!username) {
+                showResult("Ошибка", "❌", "Введите имя пользователя");
+                return;
+            }
+            
+            showLoading("Создание профиля...");
+            
+            // Генерируем ID
+            userId = generateUserId();
+            
+            // Создаем объект пользователя
+            userData = {
+                username: username,
+                telegramId: telegramId || null,
+                stars: 20, // Стартовый баланс
+                free_spins: 2,
+                total_wins: 0,
+                total_games: 0,
+                win_streak: 0,
+                registration_date: new Date().toISOString(),
+                last_login: new Date().toISOString(),
+                game_history: []
+            };
+            
+            // Сохраняем в localStorage
+            saveUserData();
+            
+            // Показываем основное содержимое
+            document.getElementById('registrationForm').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            
+            // Обновляем интерфейс
+            updateUI();
+            hideLoading();
+            
+            // Показываем приветствие
+            showResult("Добро пожаловать!", "🎉", `Привет, ${username}! Теперь вы можете играть.`);
+            
+            // Сохраняем в Telegram WebApp если доступно
+            if (tg) {
+                tg.sendData(JSON.stringify({
+                    action: 'register',
+                    user_id: userId,
+                    username: username
+                }));
+            }
+        }
 
         // Загрузка данных пользователя
-        async function loadUserData() {
-            showLoading();
-            try {
-                // В реальном приложении здесь будет запрос к вашему серверу
-                // const response = await fetch(`/api/user/${userId}`);
-                // userData = await response.json();
+        function loadUserData() {
+            // Проверяем localStorage
+            const savedUserId = localStorage.getItem('casino_user_id');
+            const savedData = localStorage.getItem('casino_user_data');
+            
+            if (savedUserId && savedData) {
+                userId = savedUserId;
+                userData = JSON.parse(savedData);
                 
-                // Имитация данных для демонстрации
-                setTimeout(() => {
-                    userData = {
-                        stars: 45,
-                        free_spins: 2,
-                        total_wins: 12,
-                        total_games: 80,
-                        win_streak: 3,
-                        game_history: [
-                            {type: "win", amount: 5, date: "10.05.2023 15:30"},
-                            {type: "loss", amount: 1, date: "10.05.2023 14:15"},
-                            {type: "win", amount: 2, date: "10.05.2023 12:45"},
-                            {type: "loss", amount: 1, date: "10.05.2023 11:20"}
-                        ]
-                    };
-                    
-                    updateUI();
-                    hideLoading();
-                }, 800);
-            } catch (error) {
-                console.error("Ошибка загрузки данных:", error);
-                hideLoading();
-                showResult("Ошибка", "❌", "Не удалось загрузить данные. Проверьте соединение.");
+                // Обновляем время последнего входа
+                userData.last_login = new Date().toISOString();
+                saveUserData();
+                
+                // Показываем основное содержимое
+                document.getElementById('registrationForm').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                
+                updateUI();
+                return true;
             }
+            return false;
+        }
+
+        // Сохранение данных пользователя
+        function saveUserData() {
+            if (userId && userData) {
+                localStorage.setItem('casino_user_id', userId);
+                localStorage.setItem('casino_user_data', JSON.stringify(userData));
+                
+                // Отправляем данные в Telegram WebApp если доступно
+                if (tg) {
+                    tg.sendData(JSON.stringify({
+                        action: 'update',
+                        user_id: userId,
+                        data: userData
+                    }));
+                }
+                return true;
+            }
+            return false;
         }
 
         // Обновление интерфейса
         function updateUI() {
+            if (!userData) return;
+            
             document.getElementById('starsBalance').textContent = userData.stars;
             document.getElementById('freeSpinsText').textContent = `Бесплатных круток: ${userData.free_spins}`;
             document.getElementById('freeSpinsCounter').textContent = userData.free_spins;
             document.getElementById('totalWins').textContent = userData.total_wins;
             document.getElementById('totalGames').textContent = userData.total_games;
             document.getElementById('winStreak').textContent = userData.win_streak;
+            document.getElementById('userId').textContent = `ID: ${userId}`;
+            
+            // Обновляем поле синхронизации
+            document.getElementById('syncCode').value = userId;
             
             // Обновляем историю
             updateGameHistory();
@@ -648,183 +822,228 @@
             historyContainer.innerHTML = '';
             
             if (userData.game_history && userData.game_history.length > 0) {
-                userData.game_history.forEach(game => {
+                userData.game_history.slice(-10).reverse().forEach(game => {
                     const historyItem = document.createElement('div');
                     historyItem.className = `history-item ${game.type}`;
                     
+                    const date = new Date(game.timestamp).toLocaleString('ru-RU');
+                    
                     if (game.type === 'win') {
                         historyItem.innerHTML = `
-                            <span><i class="fas fa-check-circle" style="color: #4caf50;"></i> Вы выиграли ${game.amount} ⭐</span>
-                            <span>${game.date}</span>
+                            <span><i class="fas fa-check-circle" style="color: #4caf50;"></i> +${game.amount} ⭐ (${game.game_type})</span>
+                            <span style="font-size: 12px; opacity: 0.7;">${date}</span>
                         `;
                     } else {
                         historyItem.innerHTML = `
-                            <span><i class="fas fa-times-circle" style="color: #f44336;"></i> Вы проиграли ${game.amount} ⭐</span>
-                            <span>${game.date}</span>
+                            <span><i class="fas fa-times-circle" style="color: #f44336;"></i> Проигрыш (${game.game_type})</span>
+                            <span style="font-size: 12px; opacity: 0.7;">${date}</span>
                         `;
                     }
                     
                     historyContainer.appendChild(historyItem);
                 });
             } else {
-                historyContainer.innerHTML = '<p style="text-align: center; opacity: 0.7;">История игр пуста</p>';
+                historyContainer.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 20px;">История игр пуста</p>';
             }
         }
 
         // Игровые функции
         function playFreeSpin() {
-            if (userData.free_spins > 0) {
-                showResult("Крутим!", "🎰", "Запускаем бесплатную крутку...");
-                
-                // Имитация игры
-                setTimeout(() => {
-                    const isWin = Math.random() < 0.15; // 15% шанс
-                    if (isWin) {
-                        const winAmount = Math.floor(Math.random() * 10) + 1;
-                        userData.stars += winAmount;
-                        userData.total_wins++;
-                        userData.win_streak++;
-                        userData.game_history.unshift({
-                            type: "win",
-                            amount: winAmount,
-                            date: new Date().toLocaleString('ru-RU')
-                        });
-                        
-                        showResult("Победа!", "🎉", `Вы выиграли ${winAmount} ⭐!`);
-                    } else {
-                        userData.total_games++;
-                        userData.win_streak = 0;
-                        userData.game_history.unshift({
-                            type: "loss",
-                            amount: 0,
-                            date: new Date().toLocaleString('ru-RU')
-                        });
-                        
-                        showResult("Повезёт в следующий раз", "😔", "К сожалению, вы не выиграли.");
-                    }
-                    
-                    userData.free_spins--;
-                    updateUI();
-                    
-                    // Синхронизация с ботом
-                    syncWithBot();
-                }, 2000);
-            } else {
-                showResult("Нет попыток", "⚠️", "У вас закончились бесплатные крутки.");
+            if (!userData || userData.free_spins <= 0) {
+                showResult("Нет попыток", "⚠️", "У вас закончились бесплатные крутки");
+                return;
             }
+            
+            showResult("Крутим!", "🎰", "Запускаем бесплатную крутку...");
+            
+            setTimeout(() => {
+                const isWin = Math.random() < 0.15;
+                
+                userData.total_games++;
+                userData.free_spins--;
+                
+                if (isWin) {
+                    const winAmount = Math.floor(Math.random() * 10) + 1;
+                    userData.stars += winAmount;
+                    userData.total_wins++;
+                    userData.win_streak++;
+                    
+                    userData.game_history.push({
+                        type: 'win',
+                        game_type: 'free_slots',
+                        amount: winAmount,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    showResult("Победа!", "🎉", `Вы выиграли ${winAmount} ⭐!`);
+                } else {
+                    userData.win_streak = 0;
+                    
+                    userData.game_history.push({
+                        type: 'loss',
+                        game_type: 'free_slots',
+                        amount: 0,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    showResult("Повезёт в следующий раз", "😔", "К сожалению, вы не выиграли");
+                }
+                
+                saveUserData();
+                updateUI();
+                
+            }, 2000);
         }
 
         function playForStars() {
-            if (userData.stars >= 1) {
-                showResult("Ставка принята!", "⭐", "Играем за 1 звезду...");
-                
-                setTimeout(() => {
-                    const isWin = Math.random() < 0.15;
-                    if (isWin) {
-                        const winAmount = Math.floor(Math.random() * 5) + 2;
-                        userData.stars += winAmount - 1; // -1 за ставку
-                        userData.total_wins++;
-                        userData.win_streak++;
-                        userData.game_history.unshift({
-                            type: "win",
-                            amount: winAmount,
-                            date: new Date().toLocaleString('ru-RU')
-                        });
-                        
-                        showResult("Выигрыш!", "💰", `Вы выиграли ${winAmount} ⭐ (чистая прибыль: ${winAmount-1} ⭐)`);
-                    } else {
-                        userData.stars--;
-                        userData.total_games++;
-                        userData.win_streak = 0;
-                        userData.game_history.unshift({
-                            type: "loss",
-                            amount: 1,
-                            date: new Date().toLocaleString('ru-RU')
-                        });
-                        
-                        showResult("Проигрыш", "❌", "Вы проиграли 1 ⭐");
-                    }
-                    
-                    updateUI();
-                    syncWithBot();
-                }, 2000);
-            } else {
-                showResult("Недостаточно звёзд", "⚠️", "Пополните баланс для игры.");
+            if (!userData || userData.stars < 1) {
+                showResult("Недостаточно звёзд", "⚠️", "Пополните баланс для игры");
+                return;
             }
+            
+            showResult("Ставка принята!", "⭐", "Играем за 1 звезду...");
+            
+            setTimeout(() => {
+                const isWin = Math.random() < 0.15;
+                
+                userData.total_games++;
+                
+                if (isWin) {
+                    const winAmount = Math.floor(Math.random() * 5) + 2;
+                    userData.stars += winAmount - 1; // -1 за ставку
+                    userData.total_wins++;
+                    userData.win_streak++;
+                    
+                    userData.game_history.push({
+                        type: 'win',
+                        game_type: 'paid_slots',
+                        amount: winAmount,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    showResult("Выигрыш!", "💰", `Вы выиграли ${winAmount} ⭐ (чистая прибыль: ${winAmount-1} ⭐)`);
+                } else {
+                    userData.stars--;
+                    userData.win_streak = 0;
+                    
+                    userData.game_history.push({
+                        type: 'loss',
+                        game_type: 'paid_slots',
+                        amount: 1,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    showResult("Проигрыш", "❌", "Вы проиграли 1 ⭐");
+                }
+                
+                saveUserData();
+                updateUI();
+                
+            }, 2000);
         }
 
         function playDice() {
-            if (userData.stars >= 1) {
-                showResult("Бросаем кости!", "🎲", "Делаем ставку 1 ⭐...");
-                
-                setTimeout(() => {
-                    const diceValue = Math.floor(Math.random() * 6) + 1;
-                    const isWin = diceValue >= 5; // Шанс ~33% для примера
-                    
-                    if (isWin) {
-                        const winAmount = 3;
-                        userData.stars += winAmount - 1;
-                        userData.total_wins++;
-                        userData.win_streak++;
-                        userData.game_history.unshift({
-                            type: "win",
-                            amount: winAmount,
-                            date: new Date().toLocaleString('ru-RU')
-                        });
-                        
-                        showResult(`Выпало ${diceValue}!`, "🎲", `Победа! Выигрыш: ${winAmount} ⭐`);
-                    } else {
-                        userData.stars--;
-                        userData.total_games++;
-                        userData.win_streak = 0;
-                        userData.game_history.unshift({
-                            type: "loss",
-                            amount: 1,
-                            date: new Date().toLocaleString('ru-RU')
-                        });
-                        
-                        showResult(`Выпало ${diceValue}`, "🎲", "Вы проиграли 1 ⭐");
-                    }
-                    
-                    updateUI();
-                    syncWithBot();
-                }, 2000);
-            } else {
-                showResult("Недостаточно звёзд", "⚠️", "Пополните баланс для игры.");
+            if (!userData || userData.stars < 1) {
+                showResult("Недостаточно звёзд", "⚠️", "Пополните баланс для игры");
+                return;
             }
-        }
-
-        function buyStars() {
-            // Отправляем команду в Telegram для покупки
-            tg.sendData(JSON.stringify({
-                action: "buy_stars",
-                user_id: userId
-            }));
             
-            showResult("Покупка звёзд", "🛒", "Открываем меню покупки...");
+            showResult("Бросаем кости!", "🎲", "Делаем ставку 1 ⭐...");
+            
+            setTimeout(() => {
+                const diceValue = Math.floor(Math.random() * 6) + 1;
+                const isWin = diceValue >= 5;
+                
+                userData.total_games++;
+                
+                if (isWin) {
+                    const winAmount = 3;
+                    userData.stars += winAmount - 1;
+                    userData.total_wins++;
+                    userData.win_streak++;
+                    
+                    userData.game_history.push({
+                        type: 'win',
+                        game_type: 'dice',
+                        amount: winAmount,
+                        dice_value: diceValue,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    showResult(`Выпало ${diceValue}!`, "🎲", `Победа! Выигрыш: ${winAmount} ⭐`);
+                } else {
+                    userData.stars--;
+                    userData.win_streak = 0;
+                    
+                    userData.game_history.push({
+                        type: 'loss',
+                        game_type: 'dice',
+                        amount: 1,
+                        dice_value: diceValue,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    showResult(`Выпало ${diceValue}`, "🎲", "Вы проиграли 1 ⭐");
+                }
+                
+                saveUserData();
+                updateUI();
+                
+            }, 2000);
         }
 
-        // Синхронизация с ботом
-        async function syncWithBot() {
-            try {
-                // В реальном приложении отправляем данные на сервер
-                // await fetch('/api/sync', {
-                //     method: 'POST',
-                //     headers: {'Content-Type': 'application/json'},
-                //     body: JSON.stringify({
-                //         user_id: userId,
-                //         data: userData
-                //     })
-                // });
-                
-                console.log("Данные синхронизированы с ботом");
-            } catch (error) {
-                console.error("Ошибка синхронизации:", error);
-            }
+        // Экспорт данных
+        function exportData() {
+            if (!userData) return;
+            
+            const exportObj = {
+                user_id: userId,
+                ...userData
+            };
+            
+            document.getElementById('exportData').value = JSON.stringify(exportObj, null, 2);
+            document.getElementById('exportModal').style.display = 'flex';
+        }
+
+        // Копирование кода синхронизации
+        function copySyncCode() {
+            const syncCode = document.getElementById('syncCode');
+            syncCode.select();
+            syncCode.setSelectionRange(0, 99999);
+            
+            navigator.clipboard.writeText(syncCode.value)
+                .then(() => {
+                    showNotification("Код скопирован в буфер обмена!");
+                })
+                .catch(err => {
+                    console.error('Ошибка копирования:', err);
+                });
+        }
+
+        // Копирование данных экспорта
+        function copyExportData() {
+            const exportData = document.getElementById('exportData');
+            exportData.select();
+            exportData.setSelectionRange(0, 99999);
+            
+            navigator.clipboard.writeText(exportData.value)
+                .then(() => {
+                    showNotification("Данные скопированы!");
+                })
+                .catch(err => {
+                    console.error('Ошибка копирования:', err);
+                });
+        }
+
+        // Загрузка истории игр
+        function loadGameHistory() {
+            updateGameHistory();
+            showNotification("История обновлена!");
         }
 
         // Вспомогательные функции
-        function showLoading() {
+        function showLoading(text = "Загрузка...") {
+            document.getElementById('loadingText').textContent = text;
             document.getElementById('loading').style.display = 'block';
         }
 
@@ -843,37 +1062,46 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
-        function loadGameHistory() {
-            // Обновляем историю
-            updateGameHistory();
-            
-            // Показываем уведомление
+        function showNotification(message) {
+            // Создаем уведомление
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: #4caf50;
+                background: linear-gradient(45deg, #4caf50, #8bc34a);
                 color: white;
                 padding: 15px 25px;
                 border-radius: 10px;
                 z-index: 1000;
-                animation: slideIn 0.3s;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                max-width: 300px;
             `;
-            notification.textContent = "История обновлена!";
+            notification.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 10px;"></i> ${message}`;
             document.body.appendChild(notification);
             
             setTimeout(() => {
-                notification.style.animation = "slideOut 0.3s";
+                notification.style.animation = "slideOut 0.3s ease";
                 setTimeout(() => notification.remove(), 300);
-            }, 2000);
+            }, 3000);
         }
 
         // Инициализация при загрузке
         document.addEventListener('DOMContentLoaded', () => {
-            loadUserData();
+            // Инициализируем Telegram WebApp
+            initTelegramWebApp();
             
-            // Стили для уведомлений
+            // Пытаемся загрузить сохраненные данные
+            const hasData = loadUserData();
+            
+            // Если данных нет, показываем форму регистрации
+            if (!hasData) {
+                document.getElementById('registrationForm').style.display = 'block';
+                document.getElementById('mainContent').style.display = 'none';
+            }
+            
+            // Добавляем стили для анимаций уведомлений
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes slideIn {
@@ -886,11 +1114,13 @@
                 }
             `;
             document.head.appendChild(style);
-        });
-
-        // Обработка сообщений от Telegram
-        tg.onEvent('viewportChanged', () => {
-            tg.expand();
+            
+            // Автосохранение каждые 30 секунд
+            setInterval(() => {
+                if (userData) {
+                    saveUserData();
+                }
+            }, 30000);
         });
     </script>
 </body>
