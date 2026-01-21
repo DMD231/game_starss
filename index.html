@@ -2004,12 +2004,120 @@
     </div>
 
     <script>
+        // ============ НОВЫЙ КОД: Конфигурация API ============
+        // ЗАМЕНИТЕ НА ВАШ ДОМЕН И ПУТЬ К API
+        const API_URL = 'https://ваш-домен.com/api.php'; // Пример: https://casino-site.com/api.php
+        
+        // Функция для отправки запросов к API
+        async function callApi(action, data = {}) {
+            try {
+                const response = await fetch(`${API_URL}?action=${action}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return { success: false, message: 'Ошибка соединения с сервером' };
+            }
+        }
+        
+        // Загрузка баланса с сервера
+        async function loadBalanceFromServer() {
+            if (!state.telegramUserId) return;
+            
+            try {
+                const result = await callApi('get_balance', {
+                    telegram_id: state.telegramUserId
+                });
+                
+                if (result.success) {
+                    state.balance = result.balance;
+                    state.level = result.level;
+                    state.wins = result.wins;
+                    updateUI();
+                    
+                    // Сохраняем локально для оффлайн игры
+                    saveGameState();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки баланса:', error);
+            }
+        }
+        
+        // Сохранение состояния игры на сервере
+        async function saveGameStateToServer() {
+            if (!state.telegramUserId) return;
+            
+            try {
+                await callApi('save_state', {
+                    telegram_id: state.telegramUserId,
+                    balance: state.balance,
+                    level: state.level,
+                    wins: state.wins
+                });
+            } catch (error) {
+                console.error('Ошибка сохранения состояния:', error);
+            }
+        }
+        
+        // Сохранение истории игры на сервере
+        async function saveGameHistoryToServer(game, bet, win, result) {
+            if (!state.telegramUserId) return;
+            
+            try {
+                await callApi('save_history', {
+                    telegram_id: state.telegramUserId,
+                    game: game,
+                    bet: bet,
+                    win: win,
+                    result: result
+                });
+            } catch (error) {
+                console.error('Ошибка сохранения истории:', error);
+            }
+        }
+        
+        // Загрузка истории игр с сервера
+        async function loadGameHistoryFromServer() {
+            if (!state.telegramUserId) return;
+            
+            try {
+                const result = await callApi('get_history', {
+                    telegram_id: state.telegramUserId,
+                    limit: 20
+                });
+                
+                if (result.success && result.history) {
+                    state.gameHistory = result.history.map(h => ({
+                        date: new Date(h.created_at).toLocaleString('ru-RU'),
+                        game: h.game,
+                        bet: h.bet,
+                        win: h.win,
+                        isWin: h.result === 'win'
+                    }));
+                    loadHistory();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки истории:', error);
+            }
+        }
+        // ============ КОНЕЦ НОВОГО КОДА API ============
+
         // Telegram Web App Integration
         let tg = null;
         let webAppUser = null;
         let webAppData = null;
 
-        // Инициализация Telegram Web App
+        // Инициализация Telegram Web App - ОБНОВЛЕННАЯ ВЕРСИЯ
         function initTelegramWebApp() {
             if (window.Telegram && Telegram.WebApp) {
                 tg = Telegram.WebApp;
@@ -2024,6 +2132,10 @@
                     // Обновляем информацию в профиле
                     updateUserProfile(webAppUser);
                     
+                    // Загружаем данные с сервера
+                    loadBalanceFromServer();
+                    loadGameHistoryFromServer();
+                    
                     // Проверяем наличие кода пополнения в параметрах запуска
                     checkStartParamForDeposit();
                 }
@@ -2034,6 +2146,8 @@
                 console.log('Telegram Web App инициализирован:', webAppUser);
             } else {
                 console.log('Игра запущена вне Telegram');
+                // Для веб-версии: проверяем наличие кода в URL
+                checkURLForDepositCode();
             }
         }
 
@@ -2157,7 +2271,7 @@
             }
         });
 
-        // Инициализация при загрузке
+        // Инициализация при загрузке - ОБНОВЛЕННАЯ ВЕРСИЯ
         document.addEventListener('DOMContentLoaded', function() {
             initTelegramWebApp();
             loadGameState();
@@ -2169,8 +2283,13 @@
             loadAchievements();
             setupDiceFaces();
             
-            // Автосохранение
-            setInterval(saveGameState, 30000);
+            // Автосохранение - с сохранением на сервер
+            setInterval(() => {
+                saveGameState();
+                if (state.telegramUserId) {
+                    saveGameStateToServer();
+                }
+            }, 30000);
             
             // Проверяем наличие кода в URL (для веб-версии)
             checkURLForDepositCode();
@@ -2251,7 +2370,7 @@
             }
         }
 
-        // Активация кода пополнения
+        // Активация кода пополнения - ОБНОВЛЕННАЯ ВЕРСИЯ С API
         async function activateDepositCode() {
             const code = document.getElementById('depositCode').value.trim();
             
@@ -2269,51 +2388,40 @@
                 // Показываем индикатор загрузки
                 showNotification('Проверка кода...', 'Пожалуйста, подождите', 'info');
                 
-                // В реальном приложении здесь будет запрос к вашему серверу
-                // Для демо-версии эмулируем ответ сервера
+                // Отправляем запрос на API
+                const result = await callApi('check_code', {
+                    code: code,
+                    telegram_id: state.telegramUserId || null
+                });
                 
-                // Имитация задержки сети
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // Демо-ответ сервера
-                const demoResponse = {
-                    success: true,
-                    package: state.selectedDepositPackage || depositPackages[0],
-                    coins: state.selectedDepositPackage ? 
-                           state.selectedDepositPackage.coins + state.selectedDepositPackage.bonus : 
-                           100,
-                    transactionId: 'DEMO_' + Date.now()
-                };
-                
-                // Для тестирования: если код содержит "TEST", всегда успех
-                if (code.includes('TEST') || Math.random() > 0.3) {
+                if (result.success) {
                     // Успешная активация
-                    processDepositSuccess(demoResponse);
+                    processDepositSuccess(result);
                 } else {
                     // Ошибка активации
-                    throw new Error('Неверный или уже использованный код');
+                    throw new Error(result.message || 'Неверный код пополнения');
                 }
                 
             } catch (error) {
                 console.error('Ошибка активации кода:', error);
-                showNotification('Ошибка', error.message || 'Неверный код пополнения', 'error');
+                showNotification('Ошибка', error.message || 'Ошибка соединения с сервером', 'error');
             }
         }
 
-        // Обработка успешного пополнения
+        // Обработка успешного пополнения - ОБНОВЛЕННАЯ ВЕРСИЯ
         function processDepositSuccess(response) {
             const coins = response.coins;
-            const packageInfo = response.package;
+            const newBalance = response.new_balance || state.balance + coins;
             
             // Пополняем баланс
-            state.balance += coins;
+            state.balance = newBalance;
             
             // Добавляем в историю пополнений
             state.depositHistory.unshift({
                 date: new Date().toLocaleString('ru-RU'),
-                package: packageInfo.label,
+                package: response.package || 'unknown',
                 coins: coins,
-                transactionId: response.transactionId
+                transactionId: response.code || 'unknown'
             });
             
             // Обновляем достижения
@@ -2331,7 +2439,10 @@
             showNotification('Успех!', `Баланс пополнен на ${formatNumber(coins)} ₿`, 'success');
             
             // Показываем модальное окно
-            showDepositSuccessModal(coins, packageInfo);
+            showDepositSuccessModal(coins, response.package);
+            
+            // Сохраняем состояние на сервере
+            saveGameStateToServer();
             
             // Если в Telegram, отправляем данные обратно
             if (tg && tg.sendData) {
@@ -2339,7 +2450,7 @@
                     action: 'deposit_success',
                     coins: coins,
                     balance: state.balance,
-                    transactionId: response.transactionId
+                    transactionId: response.code || 'unknown'
                 };
                 tg.sendData(JSON.stringify(data));
             }
@@ -2356,7 +2467,7 @@
             document.getElementById('depositModal').classList.remove('show');
         }
 
-        // Сохранение и загрузка
+        // Сохранение и загрузка - ОБНОВЛЕННЫЕ ВЕРСИИ
         function loadGameState() {
             const saved = localStorage.getItem('casinoState');
             if (saved) {
@@ -2457,6 +2568,7 @@
             
             updateUI();
             saveGameState();
+            saveGameStateToServer();
             showNotification('Бонус получен!', `+${bonusAmount} ₿ добавлено на баланс`);
             updateAchievementProgress('bigWinner', bonusAmount);
         }
@@ -2584,6 +2696,7 @@
                 
                 updateUI();
                 saveGameState();
+                saveGameStateToServer();
                 
                 if (winMultiplier >= 10) {
                     showWinModal(winAmount, winMessage);
@@ -2767,6 +2880,7 @@
                     
                     updateUI();
                     saveGameState();
+                    saveGameStateToServer();
                     
                     showNotification('Победа!', `Выпало ${winningNumber}. Вы выиграли ${formatNumber(winAmount)} ₿`);
                 } else {
@@ -3032,6 +3146,7 @@
             
             updateUI();
             saveGameState();
+            saveGameStateToServer();
         }
 
         // ============ КОСТИ ============
@@ -3107,6 +3222,7 @@
                     
                     updateUI();
                     saveGameState();
+                    saveGameStateToServer();
                     
                     showNotification('Победа!', `Выпало ${total}. Вы выиграли ${formatNumber(winAmount - diceBet)} ₿`);
                 } else {
@@ -3176,6 +3292,11 @@
             
             saveGameState();
             loadHistory();
+            
+            // Сохраняем на сервере
+            if (state.telegramUserId) {
+                saveGameHistoryToServer(game, bet, win, isWin ? 'win' : 'loss');
+            }
         }
 
         function loadHistory() {
@@ -3219,6 +3340,8 @@
                     
                     state.balance += reward;
                     updateUI();
+                    saveGameState();
+                    saveGameStateToServer();
                     showNotification('Достижение разблокировано!', `+${formatNumber(reward)} ₿`, 'success');
                 }
                 
@@ -3282,9 +3405,21 @@
             state.balance += coins;
             updateUI();
             saveGameState();
+            saveGameStateToServer();
             showNotification('Тест пополнения', `+${coins} ₿ добавлено на баланс`, 'success');
+        };
+        
+        // Тестирование API
+        window.testApi = async () => {
+            try {
+                const result = await callApi('health', {});
+                console.log('API Health:', result);
+                showNotification('API Health', result.status, 'info');
+            } catch (error) {
+                console.error('API Test Error:', error);
+                showNotification('API Error', 'Сервер не отвечает', 'error');
+            }
         };
     </script>
 </body>
 </html>
-
